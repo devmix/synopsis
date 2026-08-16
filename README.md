@@ -1,5 +1,13 @@
 # Synopsis[MEMEX]
 
+[![CI](https://img.shields.io/github/actions/workflow/status/devmix/synopsis/ci.yml?label=ci&branch=main)](https://github.com/devmix/synopsis/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/devmix/synopsis?include_prereleases)](https://github.com/devmix/synopsis/releases)
+[![License](https://img.shields.io/github/license/devmix/synopsis)](LICENSE)
+[![Go 1.25+](https://img.shields.io/badge/go-1.25%2B-blue?logo=go&logoColor=white)](https://go.dev/dl/)
+[![MCP Server](https://img.shields.io/badge/MCP-server-8A2BE2)](https://modelcontextprotocol.io)
+[![SQLite FTS5 + vec0](https://img.shields.io/badge/SQLite-FTS5%20+%20vec0-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![ONNX Runtime](https://img.shields.io/badge/embedding-ONNX%20Runtime-3E8EDE)](https://onnxruntime.ai)
+
 Zero-Infrastructure RAG & Knowledge Graph with hybrid search and [MCP](https://modelcontextprotocol.io) interface for LLM agents. Built in Go, runs entirely offline with SQLite + ONNX Runtime — no external dependencies required at runtime (an OpenAI-compatible API is optional, used only for LLM-based NER and cross-domain entity linking).
 
 ## Overview

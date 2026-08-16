@@ -103,3 +103,39 @@ jobs:
           go test -race -coverprofile=coverage.out -covermode=atomic ./...
           # Print summary to logs.
           go tool cover -func=coverage.out | tail -1
+
+      # Render a per-package table into the job summary so it is visible on
+      # the Actions run page without opening the log (GitHub has no native
+      # coverage UI; this keeps everything in-repo).
+      - name: Coverage summary
+        run: |
+          {
+            echo "## Test coverage"
+            echo ""
+            echo "| Package | Coverage |"
+            echo "|---------|--------:|"
+            awk '
+              $1 == "" || /^mode:/ { next }
+              {
+                file = $1; sub(/:.*/, "", file)
+                mod = "github.com/devmix/synopsis/"
+                if (index(file, mod)) rel = substr(file, index(file, mod) + length(mod)); else rel = file
+                n = split(rel, segs, "/")
+                dir = segs[1]
+                for (i = 2; i < n; i++) dir = dir "/" segs[i]
+                stmts[dir] += $2
+                if ($3 > 0) cov[dir] += $2
+              }
+              END { for (d in stmts) printf "| %s | %.1f%% |\n", d, 100 * cov[d] / stmts[d] }
+            ' coverage.out | sort
+            echo ""
+            TOTAL=$(go tool cover -func=coverage.out | tail -1 | awk '{print $NF}')
+            echo "**Total: ${TOTAL}**"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.out
+          retention-days: 30

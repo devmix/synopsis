@@ -25,6 +25,25 @@ const config: Config = {
 
     onBrokenLinks: 'throw',
 
+    headTags: [
+        {
+            tagName: 'link',
+            attributes: {rel: 'preconnect', href: 'https://fonts.googleapis.com'},
+        },
+        {
+            tagName: 'link',
+            attributes: {
+                rel: 'preconnect',
+                href: 'https://fonts.gstatic.com',
+                crossorigin: 'anonymous',
+            },
+        },
+    ],
+
+    stylesheets: [
+        'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap',
+    ],
+
     i18n: {
         defaultLocale: 'en',
         locales: ['en', 'ru'],
@@ -113,11 +132,44 @@ const config: Config = {
             style: 'dark',
             links: [
                 {
-                    title: 'Docs',
+                    title: 'Documentation',
                     items: [
                         {
-                            label: 'Documentation',
+                            label: 'Introduction',
                             to: '/docs/intro',
+                        },
+                        {
+                            label: 'Quickstart',
+                            to: '/docs/quickstart',
+                        },
+                        {
+                            label: 'The Pipeline',
+                            to: '/docs/concepts/pipeline',
+                        },
+                        {
+                            label: 'MCP Tools',
+                            to: '/docs/reference/mcp-tools',
+                        },
+                    ],
+                },
+                {
+                    title: 'Reference',
+                    items: [
+                        {
+                            label: 'CLI',
+                            to: '/docs/reference/cli',
+                        },
+                        {
+                            label: 'Config Schema',
+                            to: '/docs/reference/config-schema',
+                        },
+                        {
+                            label: 'Database Schema',
+                            to: '/docs/reference/database-schema',
+                        },
+                        {
+                            label: 'Roadmap',
+                            to: '/docs/roadmap',
                         },
                     ],
                 },
@@ -131,7 +183,7 @@ const config: Config = {
                     ],
                 },
             ],
-            copyright: `Copyright © ${new Date().getFullYear()} Synopsis[MEMEX]. Built with Docusaurus.`,
+            copyright: `Copyright © ${new Date().getFullYear()} Synopsis[MEMEX] — structured information for AI agents via MCP. Go · SQLite · ONNX · MCP`,
         },
         prism: {
             theme: prismThemes.github,
