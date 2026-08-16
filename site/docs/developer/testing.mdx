@@ -83,7 +83,7 @@ go test -bench=BenchmarkGraphExpansion -benchmem ./internal/search/...
 go test -bench=BenchmarkSugarmeTokenizer -benchmem ./internal/embedding/...
 ```
 
-`make test-coverage` is the quickest way to find untested branches after a change; CI uploads the profile to Codecov (see [CI/CD](./ci-cd)).
+`make test-coverage` is the quickest way to find untested branches after a change; CI runs the same suite with `-covermode=atomic` and prints the total to its job log (see [CI/CD](./ci-cd#ci-workflow-ciyml)).
 
 ## Where the tests live
 
@@ -121,5 +121,5 @@ Then, always: `make test` with `-race`, `make vet`, `make lint`.
 ## See also
 
 - [Coding Standards](./coding-standards) — testing conventions as a general principle
-- [CI/CD](./ci-cd) — what runs automatically (race detector, coverage → Codecov)
+- [CI/CD](./ci-cd) — what runs automatically (race detector, lint, coverage in the job log)
 - [Migrations](./migrations) — testing schema changes
