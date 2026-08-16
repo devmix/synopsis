@@ -32,8 +32,8 @@ export default function Home(): ReactNode {
         </noscript>
         <main>
           <Hero />
-          <ArchitectureSection />
           <Ticker />
+          <ArchitectureSection />
           <PipelineSection />
           <FeaturesSection />
           <HowSection />

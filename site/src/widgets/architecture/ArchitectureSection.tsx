@@ -14,7 +14,7 @@ export function ArchitectureSection(): ReactNode {
           <b>//</b> 00 · architecture
         </p>
         <h2 className={styles.display} data-reveal>
-          One binary. One file. Zero external services.
+          All-in-One. Zero external services.
         </h2>
         <p className={styles.sectionLead} data-reveal>
           Upstream sources are cleaned and normalized into domain-tagged documents.

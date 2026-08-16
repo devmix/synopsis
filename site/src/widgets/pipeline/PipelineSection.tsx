@@ -32,9 +32,7 @@ export function PipelineSection(): ReactNode {
           <b>//</b> 01 · pipeline
         </p>
         <h2 className={styles.display} data-reveal>
-          Clean data in.
-          <br />
-          MCP tools out.
+          Clean data in → MCP tools out.
         </h2>
         <p className={styles.sectionLead} data-reveal>
           Synopsis is one stage of a larger information pipeline — not a

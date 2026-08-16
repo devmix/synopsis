@@ -168,7 +168,7 @@
 }
 
 .navbar--fixed-top {
-  background-color: transparent;
+  /*background-color: transparent;*/
   box-shadow: none;
   border-bottom: 1px solid transparent;
 }
