@@ -1,5 +1,5 @@
 /**
- * Synopsis[MEMEX] — landing page (design: hybrid v5 base + landing-sample content
+ * synopsis[memex] — landing page (design: hybrid v5 base + landing-sample content
  * + v3 accents + v2 structural borrowings).
  *
  * DESIGN TOKENS
@@ -34,7 +34,7 @@
   color: var(--accent-ink);
 }
 
-.page a:not(.btn) {
+.page a:not([class*='btn']) {
   color: inherit;
   text-decoration: none;
 }
