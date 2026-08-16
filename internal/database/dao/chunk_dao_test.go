@@ -182,7 +182,7 @@ func TestChunkDAOSearchFTS_DomainFilter(t *testing.T) {
 		{
 			name:      "domain policy returns multi-domain chunks",
 			domain:    "policy",
-			wantCount: 1, // doc3 has domain ["hr","policy"], 1 chunk
+			wantCount: 1, // doc3 has domain ["legal","policy"], 1 chunk
 		},
 		{
 			name:      "nonexistent domain returns empty",
@@ -249,8 +249,8 @@ func TestChunkDAOSearchFTS_DomainFilter(t *testing.T) {
 				}
 			}
 
-			// Insert doc3 with domain ["hr","policy"] in metadata_json, 1 chunk (multi-domain).
-			metaJSON3 := `{"domain":["hr","policy"]}`
+			// Insert doc3 with domain ["legal","policy"] in metadata_json, 1 chunk (multi-domain).
+			metaJSON3 := `{"domain":["legal","policy"]}`
 			if _, err := d.DB().Exec(
 				`INSERT INTO documents (source_type, original_path, metadata_json) VALUES ('test', ?, ?);`,
 				"/test/doc_multi.md", &metaJSON3,
@@ -264,7 +264,7 @@ func TestChunkDAOSearchFTS_DomainFilter(t *testing.T) {
 
 			if _, err := d.DB().Exec(
 				`INSERT INTO chunks (doc_id, chunk_text, sequence_num) VALUES (?, ?, ?);`,
-				docID3, "multi domain policy and hr content", 1,
+				docID3, "multi domain legal and policy chunk content", 1,
 			); err != nil {
 				t.Fatalf("insert chunk: %v", err)
 			}
