@@ -1,4 +1,4 @@
-# CI Pipeline — test, lint, cross-compile, coverage.
+# CI Pipeline — test, lint, cross-compile (via GoReleaser), coverage.
 # Triggered on every push and pull request.
 name: CI
 
@@ -15,15 +15,21 @@ concurrency:
 
 env:
   GO_VERSION: "1.25.5"
-  ZIG_VERSION: "0.14.0"
+  ZIG_VERSION: "0.16.0"
 
 jobs:
   # ------------------------------------------------------------------
   # Test — run the full test suite with race detector.
+  # CGO_CFLAGS enables FTS5/VEC in the bundled go-sqlite3 build; without
+  # them fts5-dependent tests would silently run against a degraded engine.
+  # Scoped to this job only: it must not leak into the goreleaser build,
+  # which sets its own per-target CGO_CFLAGS from .goreleaser.yaml.
   # ------------------------------------------------------------------
   test:
     name: Test (ubuntu-latest)
     runs-on: ubuntu-latest
+    env:
+      CGO_CFLAGS: "-DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_VEC"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,13 +41,10 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y gcc libsqlite3-dev
-
-      - name: Download modules
-        run: go mod download
+        run: sudo apt-get update && sudo apt-get install -y gcc
 
       - name: Run tests with race detector
-        run: go test -race -v ./...
+        run: go test -race ./...
 
   # ------------------------------------------------------------------
   # Lint — golangci-lint static analysis.
@@ -62,24 +65,18 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
+          version: 1.64
           args: ./...
 
   # ------------------------------------------------------------------
-  # Build — cross-compile all platforms via Zig.
+  # Build — full GoReleaser pipeline (build + archive + checksums) in
+  # snapshot mode, so CI validates exactly what the release produces.
+  # All platforms are cross-compiled via Zig from one job using
+  # .goreleaser.yaml as the single build source of truth.
   # ------------------------------------------------------------------
   build:
-    name: Cross-build (${{ matrix.platform }})
+    name: Build all platforms (GoReleaser snapshot)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-          - linux-amd64
-          - linux-arm64
-          - windows-amd64
-          - macos-amd64
-          - macos-arm64
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -90,36 +87,37 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache: true
 
-      - name: Install Zig
+      # Symlink (not move) so Zig can resolve its bundled libraries, which
+      # the darwin cross-build needs for libSystem.tbd.
+      - name: Install Zig ${{ env.ZIG_VERSION }}
         run: |
-          curl -L "https://ziglang.org/builds/zig-linux-x86_64-${ZIG_VERSION}.tar.xz" \
-            | tar xfJ - \
-            -C /tmp/
-          sudo mv "/tmp/zig-linux-x86_64-${ZIG_VERSION}/zig" /usr/local/bin/zig
+          curl -fsSL "https://ziglang.org/builds/zig-linux-x86_64-${{ env.ZIG_VERSION }}.tar.xz" \
+            | tar xfJ -C /opt/
+          ln -sf "/opt/zig-linux-x86_64-${{ env.ZIG_VERSION }}/zig" /usr/local/bin/zig
           zig version
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y gcc libsqlite3-dev
+      - name: Run GoReleaser (snapshot)
+        uses: goreleaser/goreleaser-action@v7.2.3
+        with:
+          distribution: goreleaser
+          version: v2.17.1
+          args: release --snapshot --clean
 
-      - name: Download modules
-        run: go mod download
-
-      - name: Build ${{ matrix.platform }}
-        run: ./scripts/build.sh "${{ matrix.platform }}"
-
-      - name: Upload artifact
+      - name: Upload dist artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: binary-${{ matrix.platform }}
-          path: bin/
+          name: goreleaser-dist
+          path: dist/
           retention-days: 7
 
   # ------------------------------------------------------------------
-  # Coverage — collect coverage and upload to codecov.
+  # Coverage — collect coverage; summary is printed to the job log.
   # ------------------------------------------------------------------
   coverage:
     name: Coverage (ubuntu-latest)
     runs-on: ubuntu-latest
+    env:
+      CGO_CFLAGS: "-DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_VEC"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -131,20 +129,10 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y gcc libsqlite3-dev
-
-      - name: Download modules
-        run: go mod download
+        run: sudo apt-get update && sudo apt-get install -y gcc
 
       - name: Run tests with coverage
         run: |
           go test -race -coverprofile=coverage.out -covermode=atomic ./...
           # Print summary to logs.
           go tool cover -func=coverage.out | tail -1
-
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v5
-        with:
-          files: coverage.out
-          fail_ci_if_error: false
-          verbose: true

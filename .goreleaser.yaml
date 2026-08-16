@@ -1,0 +1,70 @@
+# GoReleaser v2 — single source of build config for CI and releases.
+# Local development builds use the Makefile / scripts/build.sh instead;
+# keep CGO_CFLAGS defines in sync with this file.
+version: 2
+
+project_name: synopsis
+
+before:
+  hooks:
+    - ./scripts/goreleaser-prebuild.sh
+
+builds:
+  - id: synopsis
+    main: ./cmd/app
+    goos: [linux, windows, darwin]
+    goarch: [amd64, arm64]
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags: ["-s", "-w"]
+    env:
+      - CGO_ENABLED=1
+      - "CGO_CFLAGS=-I/tmp/synopsis-goreleaser/sqlite-include -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_VEC -fno-sanitize=undefined"
+    overrides:
+      - goos: linux
+        goarch: amd64
+        env:
+          - "CC=zig cc -target x86_64-linux-gnu"
+          - "CXX=zig c++ -target x86_64-linux-gnu"
+      - goos: linux
+        goarch: arm64
+        env:
+          - "CC=zig cc -target aarch64-linux-gnu"
+          - "CXX=zig c++ -target aarch64-linux-gnu"
+      - goos: windows
+        goarch: amd64
+        env:
+          - "CC=zig cc -target x86_64-windows"
+          - "CXX=zig c++ -target x86_64-windows"
+      - goos: darwin
+        goarch: amd64
+        env:
+          - "CC=zig cc -target x86_64-macos"
+          - "CXX=zig c++ -target x86_64-macos"
+          - "CGO_LDFLAGS=-Wl,-undefined,dynamic_lookup -L/tmp/synopsis-goreleaser/darwin-stubs -F/tmp/synopsis-goreleaser/darwin-stubs -L/tmp/synopsis-goreleaser/zig-sdk -F/tmp/synopsis-goreleaser/zig-sdk"
+      - goos: darwin
+        goarch: arm64
+        env:
+          - "CC=zig cc -target aarch64-macos"
+          - "CXX=zig c++ -target aarch64-macos"
+          - "CGO_LDFLAGS=-Wl,-undefined,dynamic_lookup -L/tmp/synopsis-goreleaser/darwin-stubs -F/tmp/synopsis-goreleaser/darwin-stubs -L/tmp/synopsis-goreleaser/zig-sdk -F/tmp/synopsis-goreleaser/zig-sdk"
+
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - src: LICENSE
+      - src: README.md
+      - src: "configs/**"
+      - src: "data/ontology/**"
+      - src: "data/storage/**"
+      - src: migrations/*
+
+checksum:
+  name_template: SHA256SUMS.txt
+
+release:
+  github:
+    owner: devmix
+    name: synopsis
+  prerelease: auto
