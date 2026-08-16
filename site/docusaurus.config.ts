@@ -4,6 +4,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
+const baseUrl = 'synopsis/docs/website/build/';
+
 const config: Config = {
     title: 'Synopsis[MEMEX]',
     tagline: 'Zero-Infrastructure RAG & Knowledge Graph',
@@ -18,7 +20,7 @@ const config: Config = {
     },
 
     url: 'https://devmix.github.io',
-    baseUrl: 'synopsis/docs/website/build/',
+    baseUrl,
 
     organizationName: 'devmix',
     projectName: 'synopsis',
@@ -42,6 +44,11 @@ const config: Config = {
 
     stylesheets: [
         'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap',
+        // Global design tokens (raw CSS, not a module). Lives in static/ because
+        // files under src/ are only bundled when imported and are never served as
+        // raw assets — a './src/css/...' href here would 404/fall back to the SPA.
+        // Absolute URL derived from baseUrl so it resolves on every route (dev + prod).
+        `/${baseUrl}css/tokens.css`,
     ],
 
     i18n: {
@@ -105,7 +112,7 @@ const config: Config = {
             },
         },
         navbar: {
-            title: 'Synopsis[MEMEX]',
+            title: 'synopsis[memex]',
             logo: {
                 alt: 'Synopsis Logo',
                 src: 'img/logo.svg',
