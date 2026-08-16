@@ -1,4 +1,4 @@
-# Synopsis[MEMEX]
+# synopsis[memex]
 
 [![CI](https://img.shields.io/github/actions/workflow/status/devmix/synopsis/ci.yml?label=ci&branch=main)](https://github.com/devmix/synopsis/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/devmix/synopsis?include_prereleases)](https://github.com/devmix/synopsis/releases)

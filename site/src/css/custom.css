@@ -25,7 +25,10 @@
 }
 
 /* Dark mode — matches landing-sample.html palette */
-[data-theme='dark'] {
+/* :root[data-theme='dark'] has specificity (0,2,0) so it wins over plain :root (0,1,0)
+   regardless of source order — prevents the cascade bug where later :root light values
+   override dark tokens when data-theme='dark' is set. */
+:root[data-theme='dark'] {
   --ifm-color-primary: #06b6d4;
   --ifm-color-primary-dark: #0891b2;
   --ifm-color-primary-darker: #0e7490;
@@ -44,26 +47,49 @@
   --ifm-footer-background-color: #111827;
 
   --docusaurus-highlighted-code-line-bg: rgba(6, 182, 212, 0.15);
+
+  /* ===== custom color tokens (dark) ===== */
+  --bg: #0a0e13;
+  --bg-2: #0d131b;
+  --panel: #101722;
+  --panel-deep: #0c1219;
+  --term-head: #0e1520;
+  --line: rgba(158, 180, 204, 0.14);
+  --line-strong: rgba(158, 180, 204, 0.28);
+  --row-hover: rgba(158, 180, 204, 0.05);
+  --text: #e8edf3;
+  --muted: #8b98a6;
+  --accent: #a8ff3e;
+  --accent-ink: #0a0e13;
+  --accent-soft: rgba(168, 255, 62, 0.09);
+  --accent-border: rgba(168, 255, 62, 0.45);
+  --accent-glow: rgba(168, 255, 62, 0.25);
+  --accent-stroke: rgba(168, 255, 62, 0.5);
+  --term-ok: #7ee787;
+  --dot-red: #ff5f57;
+  --dot-yellow: #febc2e;
+  --dot-green: #28c840;
 }
 
 :root {
-    /* ===== palette (v5 base) ===== */
-    --bg: #0a0e13;
-    --bg-2: #0d131b;
-    --panel: #101722;
-    --panel-deep: #0c1219;
-    --term-head: #0e1520;
-    --line: rgba(158, 180, 204, 0.14);
-    --line-strong: rgba(158, 180, 204, 0.28);
-    --row-hover: rgba(158, 180, 204, 0.05);
-    --text: #e8edf3;
-    --muted: #8b98a6;
-    --accent: #a8ff3e;
+    /* ===== palette (light) ===== */
+    --bg: #f9fafb;
+    --bg-2: #f1f3f6;
+    --panel: #ffffff;
+    --panel-deep: #f1f3f6;
+    --term-head: #0e1520; /* terminal stays dark in both themes */
+    --line: rgba(10, 14, 19, 0.12);
+    --line-strong: rgba(10, 14, 19, 0.24);
+    --row-hover: rgba(10, 14, 19, 0.04);
+    --text: #0a0e13;
+    --muted: #5a6672;
+    --accent: #6aa800;
     --accent-ink: #0a0e13;
-    --accent-soft: rgba(168, 255, 62, 0.09);
-    --accent-border: rgba(168, 255, 62, 0.45);
-    --accent-glow: rgba(168, 255, 62, 0.25);
-    --accent-stroke: rgba(168, 255, 62, 0.5);
+    --accent-soft: rgba(106, 168, 0, 0.10);
+    --accent-border: rgba(106, 168, 0, 0.35);
+    --accent-glow: rgba(106, 168, 0, 0.18);
+    --accent-stroke: rgba(106, 168, 0, 0.40);
+    /* Terminal-only tokens — dark in both themes */
     --term-ok: #7ee787;
     --dot-red: #ff5f57;
     --dot-yellow: #febc2e;
@@ -144,6 +170,19 @@
     --glow-size: 520px;
     --grid-gap: 64px;
     --grid-pattern: 56px;
+
+    /* ===== footer (index-v5 mockup) ===== */
+    --foot-col-gap: 48px;
+    --foot-col-gap-sm: 36px;
+    --foot-title-mb: 20px;
+    --foot-item-pad: 6px;
+    --foot-bottom-pad: 28px;
+    --foot-pad-bottom: 36px;
+    --foot-brand-max: 280px;
+    --foot-brand-mt: 18px;
+    --logo-dot: 9px;
+    --logo-dot-glow: 0 0 12px var(--accent);
+    --ls-logo: 0.02em;
 }
 
 /**
@@ -214,8 +253,22 @@
 /* --- brand: accent dot + mono wordmark --------------------------------- */
 
 .navbar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-xs);
   margin-right: 0; /* spacing handled by group column-gap above */
   color: var(--ifm-navbar-link-color);
+}
+
+/* CSS-only accent dot (same tokens as .foot-logo-dot) — replaces removed logo SVG */
+.navbar__brand::before {
+  content: '';
+  width: var(--logo-dot);
+  height: var(--logo-dot);
+  background: var(--accent);
+  border-radius: var(--radius-circle);
+  box-shadow: var(--logo-dot-glow);
+  flex-shrink: 0;
 }
 
 [data-theme='dark'] .navbar__brand,
@@ -228,14 +281,6 @@
   font-size: var(--fs-lead);
   font-weight: var(--fw-med);
   letter-spacing: var(--ls-normal);
-}
-
-/* dot.svg is an 18×18 svg with a 9px circle — rendered at 18px the visible
-   dot matches the mockup's 9px accent dot; drop-shadow adds its glow. */
-.navbar__logo {
-  width: 18px;
-  height: 18px;
-  filter: drop-shadow(0 0 6px var(--accent-stroke));
 }
 
 /* --- nav links (Docs / Reference / Roadmap / GitHub) ---------------------
@@ -294,7 +339,7 @@
   border-radius: var(--radius-xs); /* mockup language (Infima default is a pill) */
 }
 
-[data-theme='dark'] {
+:root[data-theme='dark'] {
   --ifm-navbar-search-input-background-color: var(--panel);
   --ifm-navbar-search-input-color: var(--text);
   --ifm-navbar-search-input-placeholder-color: var(--muted);
@@ -412,9 +457,23 @@
 }
 
 .navbar-sidebar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-xs);
   color: var(--ifm-navbar-link-color);
   border-bottom: 1px solid var(--line);
   box-shadow: none;
+}
+
+/* CSS-only accent dot for mobile sidebar brand (same as navbar) */
+.navbar-sidebar__brand::before {
+  content: '';
+  width: var(--logo-dot);
+  height: var(--logo-dot);
+  background: var(--accent);
+  border-radius: var(--radius-circle);
+  box-shadow: var(--logo-dot-glow);
+  flex-shrink: 0;
 }
 
 [data-theme='dark'] .navbar-sidebar__brand,
@@ -487,4 +546,169 @@
 [data-reveal][data-revealed='true'] {
     opacity: 1;
     transform: none;
+}
+
+/**
+ * ============================================================
+ * FOOTER — restyled per .mockups/index-v5.html (FOOTER-V5-STYLE).
+ * Appended after all existing rules; Infima CSS lives in @layer docusaurus.infima,
+ * custom.css is unlayered → wins without !important.
+ * Values reference tokens from :root above where possible.
+ * ============================================================
+ */
+
+/* --- base footer -------------------------------------------------------- */
+
+.footer--dark {
+    --ifm-footer-background-color: var(--bg);
+    background: var(--bg);
+    border-top: var(--bw) solid var(--line);
+    padding: var(--gap-3xl) 0 var(--foot-pad-bottom);
+    color: var(--text);
+}
+
+.footer .container {
+    max-width: var(--wrap-max);
+    padding: 0 var(--pad-x);
+}
+
+/* --- links grid (kills Infima flex columns) ----------------------------- */
+
+.footer__links {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: var(--foot-col-gap);
+    margin-bottom: var(--gap-2xl);
+}
+
+.footer__col {
+    width: 100%;
+    max-width: none;
+    flex: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- column titles ------------------------------------------------------ */
+
+.footer__title {
+    font-family: var(--font-mono);
+    font-size: var(--fs-mono-xs);
+    font-weight: var(--fw-med);
+    letter-spacing: var(--ls-wider);
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: var(--foot-title-mb);
+}
+
+/* --- link items --------------------------------------------------------- */
+
+.footer__item {
+    margin: 0;
+}
+
+.footer__link-item {
+    display: block;
+    position: relative;
+    color: var(--text);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    padding: var(--foot-item-pad) 0;
+    transition: color var(--dur-fast) ease;
+}
+
+.footer__link-item::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 1px;
+    background-color: var(--accent);
+    transition: width 0.3s var(--ease-out);
+}
+
+.footer__link-item:hover {
+    color: var(--ifm-font-color-base);
+}
+
+[data-theme='dark'] .footer__link-item:hover {
+    color: var(--text);
+}
+
+.footer__link-item:hover::after {
+    width: 100%;
+}
+
+/* --- bottom row --------------------------------------------------------- */
+
+.footer__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--gap-md);
+    flex-wrap: wrap;
+    border-top: var(--bw) solid var(--line);
+    padding-top: var(--foot-bottom-pad);
+    text-align: left; /* overrides Infima .text--center */
+}
+
+.footer__copyright {
+    font-family: var(--font-mono);
+    font-size: var(--fs-mono-xs);
+    color: var(--muted);
+    letter-spacing: var(--ls-mono);
+}
+
+/* --- brand column ------------------------------------------------------- */
+
+/* title is ' ' (non-empty for validator) — hide it completely */
+.footer-col-brand .footer__title {
+    display: none;
+}
+
+.footer-col-brand .footer__items {
+    margin: 0;
+    padding: 0;
+}
+
+.foot-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    font-family: var(--font-mono);
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-med);
+    letter-spacing: var(--ls-logo);
+    color: var(--text);
+}
+
+.foot-logo-dot {
+    width: var(--logo-dot);
+    height: var(--logo-dot);
+    background: var(--accent);
+    border-radius: var(--radius-circle);
+    box-shadow: var(--logo-dot-glow);
+}
+
+.foot-brand {
+    color: var(--muted);
+    font-size: var(--fs-sm);
+    max-width: var(--foot-brand-max);
+    margin-top: var(--foot-brand-mt);
+}
+
+/* --- responsive --------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+    .footer__links {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .footer__links {
+        grid-template-columns: 1fr;
+        gap: var(--foot-col-gap-sm);
+    }
 }

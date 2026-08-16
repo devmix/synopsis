@@ -25,20 +25,18 @@ export const TERMINAL_LINES: readonly TermLine[] = [
 ];
 
 export const TICKER_ITEMS: readonly string[] = [
-  'Go 1.25',
-  'MCP',
+  'GoLang',
+  'Cross-Platform',
+  'MCP / HTTP / SSE',
   'LLM',
   'SQLite',
   'FTS5',
   'ONNX',
   'CEL',
-  'Hybrid Search',
-  'RRF',
+  'Lexical / Semantic : Hybrid Search',
   'NER',
   'Ontology',
   'Knowledge Graph',
-  'HTTP / SSE',
-  'Zig cross-compile',
   'Single binary',
 ];
 

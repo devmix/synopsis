@@ -76,7 +76,14 @@
 }
 
 .qsCode {
-  background: var(--panel-deep);
+  /* Force dark appearance in both themes — scoped overrides ensure all internal
+     var() references (text, muted, accent, line) resolve to dark values. */
+  background: var(--term-head);
+  --text: #e8edf3;
+  --muted: #8b98a6;
+  --accent: #a8ff3e;
+  --line: rgba(158, 180, 204, 0.14);
+  --line-strong: rgba(158, 180, 204, 0.28);
   border: var(--bw) solid var(--line-strong);
   border-radius: var(--radius-md);
   overflow: hidden;

@@ -17,8 +17,10 @@ const config: Config = {
         mermaid: true,
     },
 
-    // Navbar scroll state: transparent at top → blurred after 12px (NAVBAR-V5-STYLE).
-    clientModules: ['./src/client/navbar-scroll'],
+    // Client modules.
+    clientModules: [
+        './src/client/navbar-scroll',   // transparent-at-top → blurred after 12px scroll
+    ],
 
     url: 'https://devmix.github.io',
     baseUrl: 'synopsis/docs/website/build/',
@@ -94,7 +96,7 @@ const config: Config = {
         colorMode: {
             defaultMode: 'dark',
             disableSwitch: false,
-            respectPrefersColorScheme: true,
+            respectPrefersColorScheme: false,
         },
         mermaid: {
             theme: {
@@ -103,12 +105,8 @@ const config: Config = {
             },
         },
         navbar: {
-            // Text wordmark (mono) + accent dot, per .mockups/index-v5.html.
+            // Text wordmark (mono) + CSS accent dot (::before), per .mockups/index-v5.html.
             title: 'synopsis_',
-            logo: {
-                alt: 'Synopsis Logo',
-                src: 'img/dot.svg',
-            },
             items: [
                 {
                     type: 'docSidebar',
@@ -140,6 +138,15 @@ const config: Config = {
         footer: {
             style: 'dark',
             links: [
+                {
+                    className: 'footer-col-brand',
+                    title: ' ', /* non-empty to satisfy multi-column validator; hidden via CSS */
+                    items: [
+                        {
+                            html: '<span class="foot-logo"><span class="foot-logo-dot"></span>synopsis_</span><p class="foot-brand">Zero-Infrastructure RAG &amp; Knowledge Graph</p>',
+                        },
+                    ],
+                },
                 {
                     title: 'Documentation',
                     items: [
