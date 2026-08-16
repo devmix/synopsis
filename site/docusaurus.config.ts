@@ -7,7 +7,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const baseUrl = 'synopsis/docs/website/build/';
 
 const config: Config = {
-    title: 'Synopsis[MEMEX]',
+    title: 'synopsis[memex]',
     tagline: 'Zero-Infrastructure RAG & Knowledge Graph',
     favicon: 'img/favicon.ico',
 
@@ -51,21 +51,6 @@ const config: Config = {
         `/${baseUrl}css/tokens.css`,
     ],
 
-    i18n: {
-        defaultLocale: 'en',
-        locales: ['en', 'ru'],
-        localeConfigs: {
-            en: {
-                label: 'English',
-                htmlLang: 'en-US',
-            },
-            ru: {
-                label: 'Русский',
-                htmlLang: 'ru-RU',
-            },
-        },
-    },
-
     presets: [
         [
             'classic',
@@ -90,7 +75,7 @@ const config: Config = {
                 hashed: true,
                 indexBlog: false,
                 indexPages: false,
-                language: ['en', 'ru'],
+                language: ['en'],
                 highlightSearchTermsOnTargetPage: true,
                 docsRouteBasePath: '/docs',
                 searchBarShortcutKeymap: 'mod+k',
@@ -123,10 +108,6 @@ const config: Config = {
                     sidebarId: 'tutorialSidebar',
                     position: 'left',
                     label: 'Docs',
-                },
-                {
-                    type: 'localeDropdown',
-                    position: 'right',
                 },
                 {
                     href: 'https://github.com/devmix/synopsis',
@@ -190,7 +171,7 @@ const config: Config = {
                     ],
                 },
             ],
-            copyright: `Copyright © ${new Date().getFullYear()} Synopsis[MEMEX] — structured information for AI agents via MCP. Go · SQLite · ONNX · MCP`,
+            copyright: `Copyright © ${new Date().getFullYear()} synopsis[memex] — structured information for AI agents via MCP. Go · SQLite · ONNX · MCP`,
         },
         prism: {
             theme: prismThemes.github,
