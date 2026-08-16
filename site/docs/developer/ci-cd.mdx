@@ -29,7 +29,7 @@ Three jobs (all on `ubuntu-latest`), wired so nothing downstream runs against re
 |---|---|
 | **Test** | install `gcc` → `go test -race ./...` with `CGO_CFLAGS="-DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_VEC"` and `CGO_LDFLAGS=-lm` (FTS5's bm25 scoring calls libm, which glibc does not merge into libc) |
 | **Lint** | `golangci/golangci-lint-action@v9.3.0`, linter version `v2.12`, args `./...` |
-| **Coverage** (`needs: [test]`) | same flags plus `-coverprofile=coverage.out -covermode=atomic`; prints the total line to the job log via `go tool cover -func \| tail -1` |
+| **Coverage** (`needs: [test]`) | same flags plus `-coverprofile=coverage.out -covermode=atomic`; prints the total line to the job log, renders a per-package table into the job summary (visible on the Actions run page), and uploads `coverage.out` as an artifact for 30 days |
 
 Notes:
 
