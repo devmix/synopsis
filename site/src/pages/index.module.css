@@ -936,6 +936,7 @@
   line-height: var(--lh-term);
   overflow-x: auto;
   color: var(--text);
+  background: transparent;
 }
 
 .codeLine {
