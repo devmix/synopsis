@@ -30,6 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CGO_CFLAGS: "-DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_VEC"
+      # FTS5's bm25 scoring calls libm; the cgo test binaries need it linked.
+      CGO_LDFLAGS: "-lm"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -65,7 +67,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: 1.64
+          version: "v1.64"
           args: ./...
 
   # ------------------------------------------------------------------
@@ -88,12 +90,14 @@ jobs:
           cache: true
 
       # Symlink (not move) so Zig can resolve its bundled libraries, which
-      # the darwin cross-build needs for libSystem.tbd.
+      # the darwin cross-build needs for libSystem.tbd. Asset layout since
+      # 0.16: zig-<arch>-<os>-<version>.tar.xz -> top dir of the same name.
       - name: Install Zig ${{ env.ZIG_VERSION }}
         run: |
-          curl -fsSL "https://ziglang.org/builds/zig-linux-x86_64-${{ env.ZIG_VERSION }}.tar.xz" \
-            | tar xfJ -C /opt/
-          ln -sf "/opt/zig-linux-x86_64-${{ env.ZIG_VERSION }}/zig" /usr/local/bin/zig
+          curl -fsSLo /tmp/zig.tar.xz \
+            "https://ziglang.org/download/${{ env.ZIG_VERSION }}/zig-x86_64-linux-${{ env.ZIG_VERSION }}.tar.xz"
+          tar xfJ /tmp/zig.tar.xz -C /opt/
+          ln -sf "/opt/zig-x86_64-linux-${{ env.ZIG_VERSION }}/zig" /usr/local/bin/zig
           zig version
 
       - name: Run GoReleaser (snapshot)
@@ -118,6 +122,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CGO_CFLAGS: "-DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_VEC"
+      CGO_LDFLAGS: "-lm"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
