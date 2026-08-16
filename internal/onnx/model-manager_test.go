@@ -108,14 +108,14 @@ func TestModelManager(t *testing.T) {
 
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
-			base := filepath.Base(r.URL.Path)
-			if base == "model.onnx" {
+			switch base := filepath.Base(r.URL.Path); base {
+			case "model.onnx":
 				w.Write(modelContent) //nolint:errcheck
-			} else if base == "tokenizer.json" {
+			case "tokenizer.json":
 				w.Write(tokenizerContent) //nolint:errcheck
-			} else if base == "tokenizer_config.json" {
+			case "tokenizer_config.json":
 				w.Write(configContent) //nolint:errcheck
-			} else {
+			default:
 				w.WriteHeader(http.StatusNotFound)
 			}
 		}))

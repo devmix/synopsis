@@ -94,7 +94,7 @@ func TestAPIProvider_GenerateEmbeddings(t *testing.T) {
 			name: "429 rate limited",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusTooManyRequests)
-				fmt.Fprint(w, `{"error":"rate limit"}`)
+				fmt.Fprint(w, `{"error":"rate limit"}`) //nolint:errcheck
 			},
 			texts:   []string{"hello"},
 			wantErr: true,
@@ -103,7 +103,7 @@ func TestAPIProvider_GenerateEmbeddings(t *testing.T) {
 			name: "500 server error",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprint(w, `{"error":"internal"}`)
+				fmt.Fprint(w, `{"error":"internal"}`) //nolint:errcheck
 			},
 			texts:   []string{"hello"},
 			wantErr: true,

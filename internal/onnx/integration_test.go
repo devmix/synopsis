@@ -57,12 +57,12 @@ func TestManager_Integration(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		base := filepath.Base(r.URL.Path)
-		if base == "model.onnx" || base == "model.onnx_data" {
+		switch base := filepath.Base(r.URL.Path); base {
+		case "model.onnx", "model.onnx_data":
 			w.Write(modelContent) //nolint:errcheck
-		} else if base == "tokenizer.json" {
+		case "tokenizer.json":
 			w.Write(tokenizerContent) //nolint:errcheck
-		} else {
+		default:
 			w.WriteHeader(http.StatusNotFound)
 		}
 	}))

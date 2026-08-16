@@ -112,9 +112,10 @@ func (p *WebpageParser) collectPages(sourcePath string) map[string]pageFiles {
 			info = pageFiles{dir: dir}
 		}
 
-		if ext == ".md" {
+		switch ext {
+		case ".md":
 			info.md = path
-		} else if ext == ".html" {
+		case ".html":
 			info.html = path
 		}
 

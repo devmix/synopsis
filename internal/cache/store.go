@@ -76,14 +76,13 @@ func isValidSQLIdentifier(name string) bool {
 		return false
 	}
 	for i, r := range name {
-		if i == 0 {
-			if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || r == '_') {
-				return false
-			}
-		} else {
-			if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '_') {
-				return false
-			}
+		letter := (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z')
+		digit := r >= '0' && r <= '9'
+		if !letter && !digit && r != '_' {
+			return false
+		}
+		if i == 0 && digit {
+			return false
 		}
 	}
 	return true

@@ -215,13 +215,7 @@ func (l *LLMCrossDomainLinker) buildCacheKey(a, b EntityCandidate) string {
 	}
 
 	h := fnv.New128a()
-	fmt.Fprint(h, first)
-	fmt.Fprint(h, "|")
-	fmt.Fprint(h, second)
-	fmt.Fprint(h, "|")
-	fmt.Fprint(h, l.sysHash)
-	fmt.Fprint(h, "|")
-	fmt.Fprint(h, l.userHash)
+	_, _ = fmt.Fprint(h, first, "|", second, "|", l.sysHash, "|", l.userHash)
 
 	return fmt.Sprintf("%x", h.Sum(nil))
 }

@@ -328,7 +328,7 @@ func TestLibraryManager_downloadArchive_HTTPError(t *testing.T) {
 	go func() {
 		_ = server.Serve(listener)
 	}()
-	defer server.Close()
+	defer server.Close() //nolint:errcheck
 
 	cfg := testONNXConfig()
 	mgr, err := NewLibraryManager(t.TempDir(), &cfg)

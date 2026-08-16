@@ -57,8 +57,8 @@ func (g *Graph) ToDOT(ctx context.Context, startNodeID int, opts BFSOptions) (st
 		if node.Description != "" {
 			label += "\\n" + truncate(escapeDOT(node.Description), 80)
 		}
-		sb.WriteString(fmt.Sprintf("  n%d [label=%q, shape=ellipse, style=filled, fillcolor=\"#%s\"];\n",
-			node.ID, label, typeColor(node.Type)))
+		fmt.Fprintf(&sb, "  n%d [label=%q, shape=ellipse, style=filled, fillcolor=\"#%s\"];\n",
+			node.ID, label, typeColor(node.Type))
 	}
 
 	sb.WriteString("\n")
@@ -66,8 +66,8 @@ func (g *Graph) ToDOT(ctx context.Context, startNodeID int, opts BFSOptions) (st
 	// Write edges.
 	for _, edge := range result.Edges {
 		label := escapeDOT(edge.RelationType)
-		sb.WriteString(fmt.Sprintf("  n%d -> n%d [label=%q];\n",
-			edge.SourceID, edge.TargetID, label))
+		fmt.Fprintf(&sb, "  n%d -> n%d [label=%q];\n",
+			edge.SourceID, edge.TargetID, label)
 	}
 
 	sb.WriteString("}\n")
