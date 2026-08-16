@@ -1,4 +1,4 @@
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
 import type {ReactNode} from 'react';
@@ -32,7 +32,7 @@ const TERMINAL_LINES: readonly TermLine[] = [
   {text: '$ make run', tone: 'cmd'},
   {text: '✓ mcp server → :8080/sse', tone: 'ok'},
   {text: '$ search {"query":"vacation policy","domain":"hr"}', tone: 'cmd'},
-  {text: '✓ 10 chunks · bm25+vector · rrf k=60', tone: 'hl'},
+  {text: '✓ 10 chunks · bm25+vector · rrf k=20', tone: 'hl'},
 ];
 
 const TICKER_ITEMS: readonly string[] = [
@@ -42,7 +42,7 @@ const TICKER_ITEMS: readonly string[] = [
   'FTS5',
   'sqlite-vec',
   'ONNX Runtime',
-  'RRF k=60',
+  'RRF k=20',
   'NER',
   'Knowledge Graph',
   'HTTP / SSE',
@@ -55,6 +55,7 @@ interface PipelineStage {
   readonly title: string;
   readonly desc: string;
   readonly meta: string;
+  readonly chips: readonly string[];
   readonly final?: boolean;
 }
 
@@ -64,24 +65,28 @@ const PIPELINE_STAGES: readonly PipelineStage[] = [
     title: 'Clean data',
     desc: 'Documents arrive normalized and tagged with domains. Synopsis does not clean or deduplicate — messy data is a stage you run upstream.',
     meta: '.md · .json · .html',
+    chips: ['Markdown', 'JSON', 'HTML'],
   },
   {
     num: '02',
     title: 'Unified format',
     desc: 'A format-specific parser turns every file into the same structured document — text, metadata, and source tags preserved.',
     meta: 'sources declared in ontology xml',
+    chips: ['Parser', 'Metadata', 'Source tags'],
   },
   {
     num: '03',
     title: 'Processing',
     desc: 'sync runs parse → chunk → embed → NER → entities → facts into a knowledge graph plus a hybrid search index, then links entities across domains.',
     meta: 'make sync · one sqlite file',
+    chips: ['Chunking', 'Embeddings', 'NER', 'Knowledge graph', 'Hybrid index'],
   },
   {
     num: '04',
     title: 'MCP access',
     desc: 'serve exposes 12 tools over HTTP/SSE. Agents retrieve chunks, entities, facts, and graph neighbors — every answer with full provenance.',
     meta: 'GET /sse · POST /message',
+    chips: ['HTTP/SSE', '12 tools', 'Provenance'],
     final: true,
   },
 ];
@@ -115,8 +120,8 @@ const FEATURES: readonly Feature[] = [
       </svg>
     ),
     name: 'Hybrid Search',
-    desc: 'Lexical (BM25) and semantic (vector) retrieval run in parallel, fused with Reciprocal Rank Fusion (k=60) and reranked with authority and freshness boosts.',
-    tags: ['FTS5/BM25', 'sqlite-vec', 'RRF k=60'],
+    desc: 'Lexical (BM25) and semantic (vector) retrieval run in parallel, fused with Reciprocal Rank Fusion (k=20) and reranked with authority and freshness boosts.',
+    tags: ['FTS5/BM25', 'sqlite-vec', 'RRF k=20'],
   },
   {
     num: '/02',
@@ -226,7 +231,7 @@ const SEARCH_STEPS: readonly FlowStep[] = [
   },
   {
     title: 'RRF fusion',
-    desc: 'Reciprocal Rank Fusion (k=60) merges both rankings — no score normalization between lexicon and cosine.',
+    desc: 'Reciprocal Rank Fusion (k=20) merges both rankings — no score normalization between lexicon and cosine.',
   },
   {
     title: 'Enrich & rerank',
@@ -335,15 +340,23 @@ function useRevealOnScroll(): void {
       document.querySelectorAll<HTMLElement>('[data-reveal]'),
     );
     if (elements.length === 0) return;
+    // Reveal state lives in the data-revealed attribute, not a class: React
+    // rewrites className from its vdom on every re-render (e.g. the accordion
+    // toggling capOpen), which would wipe a manually-added class and hide
+    // already-revealed content. Attributes absent from JSX props are left
+    // untouched by React, so data-revealed survives re-renders.
+    const markRevealed = (el: Element): void => {
+      el.setAttribute('data-revealed', 'true');
+    };
     if (typeof IntersectionObserver === 'undefined') {
-      elements.forEach((el) => el.classList.add(styles.revealIn));
+      elements.forEach(markRevealed);
       return;
     }
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            entry.target.classList.add(styles.revealIn);
+            markRevealed(entry.target);
             observer.unobserve(entry.target);
           }
         }
@@ -521,6 +534,25 @@ function Ticker(): ReactNode {
 }
 
 function PipelineSection(): ReactNode {
+  const [openIdx, setOpenIdx] = useState(0);
+  const bodyRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    bodyRefs.current.forEach((el, i) => {
+      if (el) el.style.maxHeight = i === openIdx ? `${el.scrollHeight}px` : '';
+    });
+  }, [openIdx]);
+
+  useEffect(() => {
+    const onResize = () => {
+      bodyRefs.current.forEach((el, i) => {
+        if (el && i === openIdx) el.style.maxHeight = `${el.scrollHeight}px`;
+      });
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [openIdx]);
+
   return (
     <section className={styles.pipeline} id="pipeline">
       <div className={styles.wrap}>
@@ -537,18 +569,49 @@ function PipelineSection(): ReactNode {
           standalone assistant and not a search platform. Everything between
           normalized documents and 12 MCP tools belongs here.
         </p>
-        <div className={styles.pipeGrid}>
-          {PIPELINE_STAGES.map((stage, i) => (
-            <div
-              key={stage.num}
-              className={`${styles.pipeStage} ${stage.final ? styles.pipeStageFinal : ''} ${['', styles.d1, styles.d2, styles.d3][i] ?? ''}`}
-              data-reveal>
-              <span className={styles.pipeNum}>STAGE_{stage.num}</span>
-              <h3>{stage.title}</h3>
-              <p>{stage.desc}</p>
-              <span className={styles.pipeMeta}>{stage.meta}</span>
-            </div>
-          ))}
+        <div className={styles.capList}>
+          {PIPELINE_STAGES.map((stage, i) => {
+            const open = i === openIdx;
+            return (
+              <div
+                key={stage.num}
+                className={`${styles.cap} ${open ? styles.capOpen : ''} ${['', styles.d1, styles.d2, styles.d3][i] ?? ''}`}
+                data-reveal>
+                <button
+                  type="button"
+                  className={styles.capHead}
+                  aria-expanded={open}
+                  aria-controls={`pipeline-body-${stage.num}`}
+                  onClick={() => setOpenIdx(open ? -1 : i)}>
+                  <span className={styles.capNum}>/{stage.num}</span>
+                  <span className={styles.capTitle}>{stage.title}</span>
+                  <span className={styles.capTags}>{stage.meta}</span>
+                  <span className={styles.capIcon} aria-hidden="true">
+                    +
+                  </span>
+                </button>
+                <div
+                  id={`pipeline-body-${stage.num}`}
+                  ref={(el) => {
+                    bodyRefs.current[i] = el;
+                  }}
+                  className={styles.capBody}>
+                  <div className={styles.capInner}>
+                    <div>
+                      <p>{stage.desc}</p>
+                      <div className={styles.chipRow}>
+                        {stage.chips.map((chip) => (
+                          <span key={chip} className={styles.chip}>
+                            {chip}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
