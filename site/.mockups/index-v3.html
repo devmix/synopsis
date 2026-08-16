@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OCTET//LABS — Infrastructure & Software Engineering</title>
+<meta name="description" content="Octet Labs designs, ships and operates the platforms behind products people can't live without.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS & BASE ============ */
+:root{
+  --ink:#0a0d10;
+  --panel:#10151b;
+  --panel-2:#0d1116;
+  --bone:#eceae0;
+  --dim:#8f979f;
+  --line:rgba(236,234,224,.13);
+  --acid:#c8ff4d;
+  --acid-soft:rgba(200,255,77,.12);
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --disp:'Archivo',var(--sans);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);color:var(--bone);
+  font-family:var(--sans);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+::selection{background:var(--acid);color:var(--ink)}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:var(--ink)}
+::-webkit-scrollbar-thumb{background:#2a3138;border:2px solid var(--ink)}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--acid);outline-offset:3px}
+.mono{font-family:var(--mono)}
+.wrap{width:min(1240px,92vw);margin-inline:auto}
+section{scroll-margin-top:96px}
+
+/* noise overlay */
+.noise{position:fixed;inset:0;z-index:200;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");}
+
+/* display type */
+.disp{font-family:var(--disp);font-stretch:125%;text-transform:uppercase;letter-spacing:-.01em;line-height:.94;font-weight:800}
+.outline{color:transparent;-webkit-text-stroke:1.5px var(--bone)}
+.acid{color:var(--acid)}
+
+/* section headers */
+.sec-head{margin-bottom:clamp(2.5rem,6vw,4.5rem)}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;display:flex;align-items:center;gap:.9rem;margin-bottom:1.2rem}
+.eyebrow::before{content:"";width:34px;height:1px;background:var(--acid)}
+.h-mask .ml{display:block;overflow:hidden;padding-bottom:.06em}
+.h-mask .ml>span{display:inline-block;transform:translateY(118%);transition:transform 1s cubic-bezier(.2,.75,.15,1)}
+.in .h-mask .ml:nth-child(1)>span{transition-delay:.05s}
+.in .h-mask .ml:nth-child(2)>span{transition-delay:.16s}
+.in .h-mask .ml:nth-child(3)>span{transition-delay:.27s}
+[data-reveal].in .ml>span,.sec-head.in .ml>span{transform:none}
+
+/* generic reveal */
+[data-reveal]{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.75,.2,1);transition-delay:var(--d,0s)}
+[data-reveal].in{opacity:1;transform:none}
+
+/* ============ STATUS BAR ============ */
+.statusbar{border-bottom:1px solid var(--line);background:var(--panel-2)}
+.statusbar .wrap{display:flex;justify-content:space-between;align-items:center;height:38px;font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+.sb-left{display:flex;gap:1.6rem;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--acid);box-shadow:0 0 0 0 rgba(200,255,77,.5);animation:pulse 2.2s infinite;display:inline-block;margin-right:.5rem}
+@keyframes pulse{to{box-shadow:0 0 0 9px transparent}}
+.sb-left .ok{color:var(--acid)}
+
+/* ============ HEADER ============ */
+header.site{position:sticky;top:0;z-index:100;background:rgba(10,13,16,.92);backdrop-filter:saturate(1.2) blur(6px);border-bottom:1px solid transparent;transition:border-color .4s}
+header.site.scrolled{border-bottom-color:var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:72px}
+.logo{font-family:var(--disp);font-stretch:125%;font-weight:900;font-size:1.3rem;letter-spacing:.02em;text-transform:uppercase}
+.logo b{color:var(--acid);font-weight:900}
+.nav-links{display:flex;gap:2.4rem;font-family:var(--mono);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase}
+.nav-links a{position:relative;padding:.3rem 0;color:var(--dim);transition:color .3s}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:1px;background:var(--acid);transform:scaleX(0);transform-origin:right;transition:transform .4s cubic-bezier(.2,.75,.2,1)}
+.nav-links a:hover{color:var(--bone)}
+.nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
+.btn{display:inline-flex;align-items:center;gap:.7rem;font-family:var(--mono);font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;padding:.95rem 1.6rem;border:1px solid var(--line);transition:background .3s,color .3s,border-color .3s,transform .3s}
+.btn .arr{transition:transform .3s}
+.btn:hover .arr{transform:translateX(5px)}
+.btn-solid{background:var(--acid);color:var(--ink);border-color:var(--acid);font-weight:600}
+.btn-solid:hover{background:#d9ff7a;transform:translateY(-2px)}
+.btn-ghost:hover{border-color:var(--bone);background:rgba(236,234,224,.05)}
+.nav .btn{padding:.7rem 1.2rem}
+.burger{display:none;flex-direction:column;gap:6px;padding:.6rem;z-index:120}
+.burger span{width:26px;height:2px;background:var(--bone);transition:transform .4s,opacity .3s}
+body.nav-open .burger span:nth-child(1){transform:translateY(8px) rotate(45deg)}
+body.nav-open .burger span:nth-child(2){opacity:0}
+body.nav-open .burger span:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
+
+/* mobile nav overlay */
+.mnav{position:fixed;inset:0;background:var(--ink);z-index:110;display:flex;flex-direction:column;justify-content:center;padding:0 8vw;gap:.4rem;clip-path:inset(0 0 100% 0);transition:clip-path .6s cubic-bezier(.7,0,.2,1)}
+body.nav-open .mnav{clip-path:inset(0 0 0 0)}
+.mnav a{font-family:var(--disp);font-stretch:125%;font-weight:800;text-transform:uppercase;font-size:clamp(2rem,9vw,3.4rem);line-height:1.15;color:var(--bone);opacity:0;transform:translateY(24px);transition:opacity .5s,transform .5s,color .3s}
+.mnav a:hover{color:var(--acid)}
+body.nav-open .mnav a{opacity:1;transform:none}
+body.nav-open .mnav a:nth-child(1){transition-delay:.15s}
+body.nav-open .mnav a:nth-child(2){transition-delay:.22s}
+body.nav-open .mnav a:nth-child(3){transition-delay:.29s}
+body.nav-open .mnav a:nth-child(4){transition-delay:.36s}
+.mnav .mfoot{margin-top:2.5rem;font-family:var(--mono);font-size:.78rem;color:var(--dim);letter-spacing:.14em;opacity:0;transition:opacity .5s .5s}
+body.nav-open .mnav .mfoot{opacity:1}
+
+/* ============ HERO ============ */
+.hero{position:relative;padding:clamp(4rem,9vh,7rem) 0 clamp(3.5rem,8vh,6rem);overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:58px 58px;opacity:.5;
+  -webkit-mask-image:radial-gradient(ellipse 90% 80% at 30% 20%,#000 30%,transparent 75%);
+          mask-image:radial-gradient(ellipse 90% 80% at 30% 20%,#000 30%,transparent 75%);}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(2rem,5vw,4.5rem);align-items:center}
+.hero-eyebrow{font-family:var(--mono);font-size:.76rem;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;margin-bottom:1.8rem;display:flex;gap:.9rem;flex-wrap:wrap}
+.hero-eyebrow b{color:var(--acid);font-weight:500}
+h1.disp{font-size:clamp(3rem,7.6vw,6.4rem)}
+.h-line{display:block}
+.hero-sub{max-width:46ch;color:var(--dim);margin:1.8rem 0 2.4rem;font-size:1.05rem}
+.hero-sub strong{color:var(--bone);font-weight:500}
+.hero-ctas{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2.6rem}
+.hero-meta{display:flex;gap:1.4rem;font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;color:var(--dim);text-transform:uppercase;flex-wrap:wrap}
+.hero-meta span::before{content:"— ";color:var(--acid)}
+
+/* terminal */
+.term-col{display:flex;flex-direction:column;gap:0}
+.terminal{background:var(--panel-2);border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.term-bar{display:flex;align-items:center;gap:.5rem;padding:.7rem 1rem;border-bottom:1px solid var(--line)}
+.term-bar i{width:10px;height:10px;border-radius:50%;background:#2c343c}
+.term-bar i:nth-child(1){background:#e0604f}.term-bar i:nth-child(2){background:#d9a441}.term-bar i:nth-child(3){background:#5fb878}
+.term-title{margin-left:auto;font-family:var(--mono);font-size:.7rem;color:var(--dim);letter-spacing:.1em}
+.term-body{padding:1.2rem 1.2rem 1.4rem;min-height:300px;font-family:var(--mono);font-size:.82rem;line-height:1.9}
+.tl.cmd{color:var(--bone)}
+.tl.dim{color:var(--dim)}
+.tl.ok{color:#7ee2a8}
+.tl.hl{color:var(--acid)}
+.cur{display:inline-block;color:var(--acid);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.term-status{border:1px solid var(--line);border-top:none;padding:.8rem 1.2rem;font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;display:flex;align-items:center;background:var(--panel)}
+
+/* ============ ACID MARQUEE ============ */
+.band{background:var(--acid);color:var(--ink);transform:rotate(-1.3deg) scale(1.02);margin:-1rem 0 4rem;border-block:1px solid var(--ink)}
+.marquee{overflow:hidden;padding:.85rem 0}
+.mq-track{display:flex;width:max-content;gap:0;animation:mq 26s linear infinite;font-family:var(--mono);font-size:.9rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.marquee:hover .mq-track{animation-play-state:paused}
+.mq-track span{padding:0 1.2rem;display:flex;align-items:center;gap:2.4rem}
+.mq-track em{font-style:normal;opacity:.55}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* ============ METRICS ============ */
+.metrics{border-block:1px solid var(--line);background:var(--panel-2)}
+.metrics .wrap{display:grid;grid-template-columns:repeat(4,1fr)}
+.metric{padding:clamp(1.8rem,3.5vw,3rem) 1.6rem;border-left:1px solid var(--line)}
+.metric:first-child{border-left:none}
+.m-num{font-family:var(--disp);font-stretch:125%;font-weight:800;font-size:clamp(2.2rem,4.4vw,3.6rem);letter-spacing:-.02em;display:block;line-height:1;color:var(--bone)}
+.m-label{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);display:block;margin-top:.8rem}
+
+/* ============ SERVICES / ACCORDION ============ */
+.services{padding:clamp(5rem,10vw,8rem) 0}
+.svc-list{border-top:1px solid var(--line)}
+.svc{border-bottom:1px solid var(--line);transition:background .3s}
+.svc:hover{background:rgba(236,234,224,.025)}
+.svc-head{width:100%;display:grid;grid-template-columns:80px 1fr 44px;align-items:center;gap:1rem;padding:1.7rem .4rem;text-align:left}
+.svc-num{font-family:var(--mono);font-size:.85rem;color:var(--dim);transition:color .3s}
+.svc:hover .svc-num,.svc.open .svc-num{color:var(--acid)}
+.svc-title{font-family:var(--disp);font-stretch:112%;font-weight:700;text-transform:uppercase;font-size:clamp(1.25rem,2.6vw,1.9rem);letter-spacing:.01em;transition:transform .35s}
+.svc:hover .svc-title{transform:translateX(10px)}
+.svc-icon{position:relative;width:40px;height:40px;border:1px solid var(--line);justify-self:end;transition:border-color .3s,background .3s}
+.svc-icon::before,.svc-icon::after{content:"";position:absolute;top:50%;left:50%;width:14px;height:1.5px;background:var(--bone);transform:translate(-50%,-50%);transition:transform .4s,background .3s}
+.svc-icon::after{transform:translate(-50%,-50%) rotate(90deg)}
+.svc.open .svc-icon{border-color:var(--acid);background:var(--acid-soft)}
+.svc.open .svc-icon::before,.svc.open .svc-icon::after{background:var(--acid)}
+.svc.open .svc-icon::after{transform:translate(-50%,-50%) rotate(0deg)}
+.svc-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s cubic-bezier(.2,.75,.2,1)}
+.svc.open .svc-body{grid-template-rows:1fr}
+.svc-body>div{overflow:hidden}
+.svc-inner{padding:0 .4rem 2rem calc(80px + 1.4rem);max-width:64ch;display:grid;gap:1.1rem}
+.svc-inner p{color:var(--dim)}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem}
+.chips span{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);padding:.35rem .8rem;color:var(--dim)}
+
+/* ============ WORK — STICKY TWO-COL ============ */
+.work{background:var(--panel-2);border-block:1px solid var(--line);padding:clamp(5rem,10vw,8rem) 0}
+.work-grid{display:grid;grid-template-columns:360px 1fr;gap:clamp(2.5rem,6vw,5.5rem)}
+.work-left{position:sticky;top:120px;height:fit-content}
+.work-idx{font-family:var(--disp);font-stretch:125%;font-weight:800;font-size:clamp(4rem,7vw,6rem);line-height:1;margin-top:1.6rem;display:flex;align-items:baseline;gap:.6rem}
+.work-idx small{font-family:var(--mono);font-size:1rem;color:var(--dim);letter-spacing:.2em;font-weight:400}
+.wbar{width:120px;height:2px;background:var(--line);margin-top:1.4rem;position:relative}
+.wbar i{position:absolute;left:0;top:0;bottom:0;background:var(--acid);width:25%;transition:width .6s cubic-bezier(.2,.75,.2,1)}
+.work-note{color:var(--dim);font-size:.95rem;margin-top:1.8rem;max-width:30ch}
+.work-link{display:inline-block;margin-top:1.4rem;font-family:var(--mono);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--acid);border-bottom:1px solid transparent;transition:border-color .3s}
+.work-link:hover{border-color:var(--acid)}
+.cs-card{margin-bottom:clamp(4rem,9vw,7rem)}
+.cs-card:last-child{margin-bottom:0}
+.cs-img{overflow:hidden;border:1px solid var(--line);position:relative;aspect-ratio:3/2;background:#0b0f13}
+.cs-img img{width:100%;height:100%;object-fit:cover;filter:grayscale(.5) contrast(1.05);transform:scale(1.02);transition:filter .8s,transform 6s ease-out;animation:breathe 16s ease-in-out infinite alternate}
+@keyframes breathe{from{transform:scale(1.02)}to{transform:scale(1.1)}}
+.cs-card:hover .cs-img img{filter:grayscale(0) contrast(1.05);transform:scale(1.14)}
+.cs-tag{position:absolute;top:1rem;left:1rem;background:var(--ink);border:1px solid var(--line);font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;padding:.45rem .9rem;color:var(--acid)}
+.cs-meta{padding-top:1.6rem;display:grid;gap:.7rem}
+.cs-client{font-family:var(--mono);font-size:.74rem;letter-spacing:.2em;color:var(--dim);text-transform:uppercase}
+.cs-meta h3{font-family:var(--disp);font-stretch:115%;font-weight:800;text-transform:uppercase;font-size:clamp(1.4rem,2.6vw,2rem);letter-spacing:.01em}
+.cs-meta p{color:var(--dim);max-width:58ch}
+.cs-foot{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:.6rem;padding-top:1.1rem;border-top:1px solid var(--line)}
+.cs-metric{font-family:var(--mono);font-size:.85rem;color:var(--acid);letter-spacing:.08em}
+
+/* ============ PROCESS ============ */
+.process{padding:clamp(5rem,10vw,8rem) 0;position:relative}
+.proc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2.2rem;position:relative;padding-top:3rem}
+.proc-line{position:absolute;top:.65rem;left:0;right:0;height:1px;background:var(--line)}
+.proc-line i{position:absolute;inset:0;background:var(--acid);transform:scaleX(0);transform-origin:left;transition:transform 1.6s cubic-bezier(.2,.75,.2,1) .3s}
+.process.in .proc-line i{transform:scaleX(1)}
+.step{position:relative}
+.step::before{content:"";position:absolute;top:-2.9rem;left:0;width:11px;height:11px;background:var(--ink);border:2px solid var(--acid);transform:rotate(45deg)}
+.step-num{font-family:var(--mono);font-size:.78rem;color:var(--acid);letter-spacing:.2em;display:block;margin-bottom:.9rem}
+.step h3{font-family:var(--disp);font-stretch:115%;font-weight:800;text-transform:uppercase;font-size:1.3rem;margin-bottom:.8rem}
+.step p{color:var(--dim);font-size:.94rem}
+
+/* ============ QUOTES ============ */
+.signal{background:var(--panel-2);border-block:1px solid var(--line);padding:clamp(5rem,10vw,7.5rem) 0;position:relative;overflow:hidden}
+.signal::before{content:"“";position:absolute;top:-4rem;right:3vw;font-family:var(--disp);font-size:26rem;color:var(--acid-soft);line-height:1;pointer-events:none}
+.q-stage{position:relative;min-height:280px;max-width:900px}
+.quote-item{position:absolute;inset:0;opacity:0;transform:translateY(14px);transition:opacity .7s,transform .7s;pointer-events:none}
+.quote-item.active{opacity:1;transform:none;pointer-events:auto}
+.quote-item blockquote{font-family:var(--disp);font-stretch:105%;font-weight:600;font-size:clamp(1.4rem,3vw,2.2rem);line-height:1.3;letter-spacing:.005em}
+.quote-item figcaption{margin-top:1.8rem;font-family:var(--mono);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.quote-item figcaption b{color:var(--acid);font-weight:500}
+.q-dots{display:flex;gap:.7rem;margin-top:2.4rem}
+.q-dot{width:34px;height:3px;background:var(--line);transition:background .4s;padding:0}
+.q-dot.active{background:var(--acid)}
+
+/* ============ CLIENT MARQUEE (subtle) ============ */
+.clients{border-bottom:1px solid var(--line);padding:1.6rem 0;overflow:hidden}
+.clients .mq-track{animation:mqr 34s linear infinite;font-family:var(--mono);font-size:.82rem;color:var(--dim);letter-spacing:.2em;text-transform:uppercase}
+.clients:hover .mq-track{animation-play-state:paused}
+@keyframes mqr{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+
+/* ============ CTA ============ */
+.cta{padding:clamp(6rem,12vw,9.5rem) 0;text-align:left;position:relative}
+.cta .disp{font-size:clamp(2.8rem,7.4vw,6rem)}
+.cta-mail{display:inline-block;margin-top:2.6rem;font-family:var(--mono);font-size:clamp(1.1rem,3vw,1.9rem);letter-spacing:.05em;color:var(--acid);position:relative;padding-bottom:.35rem}
+.cta-mail::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:2px;background:var(--acid);transform:scaleX(.25);transform-origin:left;transition:transform .5s cubic-bezier(.2,.75,.2,1)}
+.cta-mail:hover::after{transform:scaleX(1)}
+.cta-row{display:flex;gap:1.4rem;align-items:center;margin-top:3rem;flex-wrap:wrap}
+.cta-note{font-family:var(--mono);font-size:.75rem;color:var(--dim);letter-spacing:.12em;text-transform:uppercase}
+
+/* ============ FOOTER ============ */
+footer{border-top:1px solid var(--line);background:var(--panel-2)}
+.f-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:2.5rem;padding:clamp(3rem,6vw,4.5rem) 0}
+.f-brand p{color:var(--dim);font-size:.92rem;margin-top:1rem;max-width:30ch}
+.f-col h4{font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:1.2rem;font-weight:500}
+.f-col ul{list-style:none;display:grid;gap:.65rem}
+.f-col a,.f-col li{color:var(--bone);font-size:.92rem}
+.f-col a{transition:color .3s}.f-col a:hover{color:var(--acid)}
+.f-status li{display:flex;align-items:center;font-family:var(--mono);font-size:.8rem;color:var(--dim)}
+.f-bottom{border-top:1px solid var(--line);padding:1.4rem 0;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}
+.f-bottom a:hover{color:var(--acid)}
+
+/* mouse coords */
+.coords{position:fixed;left:1.2rem;bottom:1.1rem;z-index:90;font-family:var(--mono);font-size:.68rem;color:var(--dim);letter-spacing:.14em;pointer-events:none}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:1024px){
+  .hero .wrap{grid-template-columns:1fr}
+  .term-col{order:-1}
+  .work-grid{grid-template-columns:1fr}
+  .work-left{position:static;display:flex;align-items:end;gap:2rem;flex-wrap:wrap}
+  .proc-grid{grid-template-columns:repeat(2,1fr);row-gap:3.5rem}
+  .metrics .wrap{grid-template-columns:repeat(2,1fr)}
+  .metric:nth-child(3){border-left:none}
+  .metric{border-top:1px solid var(--line)}
+  .metric:nth-child(-n+2){border-top:none}
+  .f-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:900px){
+  .nav-links,.nav .btn{display:none}
+  .burger{display:flex}
+  .coords{display:none}
+  .sb-left span.hide-s{display:none}
+}
+@media (max-width:640px){
+  .proc-grid{grid-template-columns:1fr}
+  .svc-head{grid-template-columns:52px 1fr 38px;padding-inline:.2rem}
+  .svc-inner{padding-left:.2rem}
+  .f-grid{grid-template-columns:1fr}
+  .q-stage{min-height:360px}
+}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .mq-track,.cs-img img{animation:none!important}
+  [data-reveal]{opacity:1;transform:none}
+  .h-mask .ml>span{transform:none}
+}
+</style>
+</head>
+<body id="top">
+
+<div class="noise" aria-hidden="true"></div>
+<div class="coords mono" id="coords" aria-hidden="true">X:0000 Y:0000</div>
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <div class="wrap">
+    <div class="sb-left">
+      <span class="ok"><i class="dot"></i>All systems operational</span>
+      <span class="hide-s">Last incident: 147 days ago</span>
+    </div>
+    <span id="clock" aria-label="current UTC time">UTC --:--:--</span>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="site" id="siteHeader">
+  <div class="wrap nav">
+    <a href="#top" class="logo">OCTET<b>//</b>LABS</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#services">Capabilities</a>
+      <a href="#work">Work</a>
+      <a href="#process">Process</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a href="#contact" class="btn btn-solid">Start a project <span class="arr">→</span></a>
+    <button class="burger" id="burger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- MOBILE NAV -->
+<nav class="mnav" id="mnav" aria-label="Mobile">
+  <a href="#services">Capabilities</a>
+  <a href="#work">Work</a>
+  <a href="#process">Process</a>
+  <a href="#contact">Contact</a>
+  <div class="mfoot mono">hello@octetlabs.io · LDN / BER / AUS</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <p class="hero-eyebrow" data-reveal><b>[ OCTET LABS ]</b> Infrastructure &amp; software engineering · est. 2016</p>
+      <h1 class="disp" aria-label="Systems that never page you">
+        <span class="h-line"><span data-scramble="SYSTEMS">SYSTEMS</span></span>
+        <span class="h-line outline"><span data-scramble="THAT NEVER">THAT NEVER</span></span>
+        <span class="h-line">PAGE YOU<span class="acid">.</span></span>
+      </h1>
+      <p class="hero-sub" data-reveal style="--d:.35s">Octet Labs is an infrastructure-first engineering studio. We design, ship and operate the platforms behind products people can't live without — from first commit to 4 a.m. incident. <strong>(There won't be one.)</strong></p>
+      <div class="hero-ctas" data-reveal style="--d:.5s">
+        <a href="#contact" class="btn btn-solid">Start a project <span class="arr">→</span></a>
+        <a href="#work" class="btn btn-ghost">See the work <span class="arr">↓</span></a>
+      </div>
+      <div class="hero-meta" data-reveal style="--d:.65s">
+        <span>SOC 2 Type II</span><span>ISO 27001</span><span>LDN · BER · AUS</span>
+      </div>
+    </div>
+
+    <div class="term-col" data-reveal style="--d:.4s">
+      <div class="terminal">
+        <div class="term-bar"><i></i><i></i><i></i><span class="term-title">octet@prod — zsh</span></div>
+        <div class="term-body" id="termBody" aria-hidden="true"></div>
+      </div>
+      <div class="term-status"><i class="dot"></i>Operating now — 312 systems · 6 regions</div>
+    </div>
+  </div>
+</section>
+
+<!-- ACID MARQUEE -->
+<div class="band" aria-hidden="true">
+  <div class="marquee">
+    <div class="mq-track">
+      <span>Terraform <em>✱</em> Kubernetes <em>✱</em> Go <em>✱</em> Rust <em>✱</em> PostgreSQL <em>✱</em> Kafka <em>✱</em> AWS <em>✱</em> GCP <em>✱</em> Datadog <em>✱</em> Helm <em>✱</em> ClickHouse <em>✱</em> gRPC <em>✱</em></span>
+      <span>Terraform <em>✱</em> Kubernetes <em>✱</em> Go <em>✱</em> Rust <em>✱</em> PostgreSQL <em>✱</em> Kafka <em>✱</em> AWS <em>✱</em> GCP <em>✱</em> Datadog <em>✱</em> Helm <em>✱</em> ClickHouse <em>✱</em> gRPC <em>✱</em></span>
+    </div>
+  </div>
+</div>
+
+<!-- METRICS -->
+<section class="metrics" aria-label="Key figures">
+  <div class="wrap">
+    <div class="metric"><span class="m-num" data-count="99.98" data-decimals="2" data-suffix="%">0%</span><span class="m-label">Fleet uptime · trailing 12 mo</span></div>
+    <div class="metric"><span class="m-num" data-count="312" data-suffix="+">0</span><span class="m-label">Production systems operated</span></div>
+    <div class="metric"><span class="m-num" data-count="6">0</span><span class="m-label">Regions · 3 continents</span></div>
+    <div class="metric"><span class="m-num" data-count="50" data-prefix="&lt;" data-suffix="ms">0ms</span><span class="m-label">Median p99 latency</span></div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div class="wrap">
+    <div class="sec-head" data-reveal>
+      <p class="eyebrow">01 // Capabilities</p>
+      <h2 class="disp h-mask" style="font-size:clamp(2.4rem,5.6vw,4.4rem)">
+        <span class="ml"><span>What we do,</span></span>
+        <span class="ml"><span>end to end<span class="acid">.</span></span></span>
+      </h2>
+    </div>
+
+    <div class="svc-list" data-reveal style="--d:.15s">
+      <div class="svc open">
+        <button class="svc-head" aria-expanded="true">
+          <span class="svc-num mono">01</span>
+          <span class="svc-title">Cloud &amp; Infrastructure Architecture</span>
+          <span class="svc-icon" aria-hidden="true"></span>
+        </button>
+        <div class="svc-body"><div><div class="svc-inner">
+          <p>Multi-cloud blueprints that survive budget reviews and traffic spikes alike. Landing zones, network topology and cost models — designed before a single VM is spun up.</p>
+          <div class="chips"><span>AWS</span><span>GCP</span><span>Azure</span><span>Terraform</span><span>Kubernetes</span></div>
+        </div></div></div>
+      </div>
+
+      <div class="svc">
+        <button class="svc-head" aria-expanded="false">
+          <span class="svc-num mono">02</span>
+          <span class="svc-title">Platform Engineering &amp; DevOps</span>
+          <span class="svc-icon" aria-hidden="true"></span>
+        </button>
+        <div class="svc-body"><div><div class="svc-inner">
+          <p>Internal developer platforms that make the right way the easy way. Golden paths, CI/CD pipelines and environments that provision in minutes — not tickets.</p>
+          <div class="chips"><span>GitHub Actions</span><span>ArgoCD</span><span>Helm</span><span>Backstage</span></div>
+        </div></div></div>
+      </div>
+
+      <div class="svc">
+        <button class="svc-head" aria-expanded="false">
+          <span class="svc-num mono">03</span>
+          <span class="svc-title">Security, Identity &amp; Compliance</span>
+          <span class="svc-icon" aria-hidden="true"></span>
+        </button>
+        <div class="svc-body"><div><div class="svc-inner">
+          <p>Zero-trust architectures, secrets management and audit trails your compliance team will actually enjoy reading. SOC 2, ISO 27001 and HIPAA-ready by design.</p>
+          <div class="chips"><span>OPA</span><span>Vault</span><span>Okta</span><span>SIEM</span></div>
+        </div></div></div>
+      </div>
+
+      <div class="svc">
+        <button class="svc-head" aria-expanded="false">
+          <span class="svc-num mono">04</span>
+          <span class="svc-title">Data Platforms &amp; AI Pipelines</span>
+          <span class="svc-icon" aria-hidden="true"></span>
+        </button>
+        <div class="svc-body"><div><div class="svc-inner">
+          <p>Streaming pipelines and lakehouses that turn raw events into decisions in milliseconds. We wire models to production — not just notebooks.</p>
+          <div class="chips"><span>Kafka</span><span>ClickHouse</span><span>Spark</span><span>dbt</span><span>Ray</span></div>
+        </div></div></div>
+      </div>
+
+      <div class="svc">
+        <button class="svc-head" aria-expanded="false">
+          <span class="svc-num mono">05</span>
+          <span class="svc-title">Legacy Modernization</span>
+          <span class="svc-icon" aria-hidden="true"></span>
+        </button>
+        <div class="svc-body"><div><div class="svc-inner">
+          <p>COBOL, monoliths and "it works, don't touch it" systems — decomposed with strangler-fig discipline until the old stack is a footnote in your architecture doc.</p>
+          <div class="chips"><span>Strangler pattern</span><span>API gateways</span><span>DDD</span></div>
+        </div></div></div>
+      </div>
+
+      <div class="svc">
+        <button class="svc-head" aria-expanded="false">
+          <span class="svc-num mono">06</span>
+          <span class="svc-title">24/7 Operations &amp; SRE</span>
+          <span class="svc-icon" aria-hidden="true"></span>
+        </button>
+        <div class="svc-body"><div><div class="svc-inner">
+          <p>Error budgets, chaos drills and on-call rotations that respect human sleep. We operate what we build — or run your fleet if you'd rather not.</p>
+          <div class="chips"><span>Datadog</span><span>PagerDuty</span><span>SLOs</span><span>Runbooks</span></div>
+        </div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORK -->
+<section class="work" id="work">
+  <div class="wrap work-grid">
+    <div class="work-left">
+      <div data-reveal>
+        <p class="eyebrow">02 // Selected work</p>
+        <h2 class="disp h-mask" style="font-size:clamp(2.4rem,5vw,3.8rem)">
+          <span class="ml"><span>Proof,</span></span>
+          <span class="ml"><span>shipped<span class="acid">.</span></span></span>
+        </h2>
+      </div>
+      <div class="work-idx" aria-hidden="true"><span id="workIdx">01</span><small>/ 04</small></div>
+      <div class="wbar" aria-hidden="true"><i id="workBar"></i></div>
+      <p class="work-note">Four of thirty-one engagements from the last two years. Names shared with permission.</p>
+      <a href="#contact" class="work-link">Request full case studies →</a>
+    </div>
+
+    <div class="work-right">
+      <article class="cs-card" data-reveal>
+        <div class="cs-img"><span class="cs-tag">Financial services</span><img src="https://picsum.photos/seed/octet-banking-core/1000/680" alt="Data center corridor representing the Meridian Bank re-platform"></div>
+        <div class="cs-meta">
+          <span class="cs-client">Meridian Bank — 2024</span>
+          <h3>Core banking, re-platformed with zero downtime</h3>
+          <p>A twenty-year-old core moved to a Kubernetes estate across two regions. Cutover happened over a weekend; customers noticed nothing except that everything got faster.</p>
+          <div class="cs-foot"><span class="cs-metric">−63% INFRA SPEND</span><div class="chips"><span>Go</span><span>K8s</span><span>Terraform</span><span>Kafka</span></div></div>
+        </div>
+      </article>
+
+      <article class="cs-card" data-reveal>
+        <div class="cs-img"><span class="cs-tag">Logistics</span><img src="https://picsum.photos/seed/octet-fleet-telemetry/1000/680" alt="Highway at night representing Fleetline real-time telemetry"></div>
+        <div class="cs-meta">
+          <span class="cs-client">Fleetline — 2024</span>
+          <h3>Real-time telemetry for 12,000 vehicles</h3>
+          <p>Forty thousand GPS events per second, ingested, enriched and queryable in under fifteen milliseconds. Dispatchers stopped refreshing dashboards; the dashboards just… work.</p>
+          <div class="cs-foot"><span class="cs-metric">12MS P95 QUERY</span><div class="chips"><span>Kafka</span><span>ClickHouse</span><span>Rust</span><span>Grafana</span></div></div>
+        </div>
+      </article>
+
+      <article class="cs-card" data-reveal>
+        <div class="cs-img"><span class="cs-tag">Healthcare</span><img src="https://picsum.photos/seed/octet-health-data/1000/680" alt="Clinical research lab representing the Helix Health data mesh"></div>
+        <div class="cs-meta">
+          <span class="cs-client">Helix Health — 2023</span>
+          <h3>A HIPAA-clean data mesh across 40 clinics</h3>
+          <p>Federated data platform with end-to-end encryption, per-clinic sovereignty and an audit trail so complete the external auditors called it "unusual" in a good way.</p>
+          <div class="cs-foot"><span class="cs-metric">0 AUDIT FINDINGS</span><div class="chips"><span>Postgres</span><span>dbt</span><span>Vault</span><span>GCP</span></div></div>
+        </div>
+      </article>
+
+      <article class="cs-card" data-reveal>
+        <div class="cs-img"><span class="cs-tag">Retail</span><img src="https://picsum.photos/seed/octet-retail-checkout/1000/680" alt="Busy retail floor representing the Northwind checkout rebuild"></div>
+        <div class="cs-meta">
+          <span class="cs-client">Northwind Retail — 2023</span>
+          <h3>A checkout that survives Black Friday</h3>
+          <p>Rebuilt the purchase path for thirty times normal load. Conversion went up while p99 latency went down, and the on-call channel stayed quiet through the biggest night of the year.</p>
+          <div class="cs-foot"><span class="cs-metric">+38% CONVERSION</span><div class="chips"><span>Node.js</span><span>Redis</span><span>K8s</span><span>AWS</span></div></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="process" id="process">
+  <div class="wrap">
+    <div class="sec-head" data-reveal>
+      <p class="eyebrow">03 // Process</p>
+      <h2 class="disp h-mask" style="font-size:clamp(2.4rem,5.6vw,4.4rem)">
+        <span class="ml"><span>No big bangs.</span></span>
+        <span class="ml"><span>Only rollbacks<span class="acid">.</span></span></span>
+      </h2>
+    </div>
+    <div class="proc-grid" id="procGrid">
+      <div class="proc-line" aria-hidden="true"><i></i></div>
+      <div class="step" data-reveal style="--d:.1s"><span class="step-num mono">STEP 01</span><h3>Discover</h3><p>Two weeks of audits, profiling and honest conversations. You get a written map of what's broken — and why it matters to the P&amp;L.</p></div>
+      <div class="step" data-reveal style="--d:.25s"><span class="step-num mono">STEP 02</span><h3>Architect</h3><p>Reference architecture, cost model, risk register and a migration plan with a rollback path at every single step.</p></div>
+      <div class="step" data-reveal style="--d:.4s"><span class="step-num mono">STEP 03</span><h3>Build &amp; ship</h3><p>Small batches, demoed weekly. Production traffic is switched over gradually — never in one heroic weekend.</p></div>
+      <div class="step" data-reveal style="--d:.55s"><span class="step-num mono">STEP 04</span><h3>Operate</h3><p>We stay on the pager, or train your team to be. SLOs, dashboards and quarterly chaos drills keep it honest.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTES -->
+<section class="signal" aria-label="Client testimonials">
+  <div class="wrap">
+    <div data-reveal><p class="eyebrow">04 // Signal</p></div>
+    <div class="q-stage" id="qStage">
+      <figure class="quote-item active">
+        <blockquote>"Octet rebuilt our platform while we kept selling into it. Our customers noticed nothing — except that everything got faster."</blockquote>
+        <figcaption><b>Dana Whitfield</b> · CTO, Meridian Bank</figcaption>
+      </figure>
+      <figure class="quote-item">
+        <blockquote>"The first vendor that talked to us about what NOT to build. The savings paid for the project twice over."</blockquote>
+        <figcaption><b>Marcus Oyelaran</b> · VP Engineering, Fleetline</figcaption>
+      </figure>
+      <figure class="quote-item">
+        <blockquote>"Their on-call handoff was so clean our team felt embarrassed by how much we'd been guessing before."</blockquote>
+        <figcaption><b>Dr. Priya Raman</b> · CIO, Helix Health</figcaption>
+      </figure>
+    </div>
+    <div class="q-dots" id="qDots" role="tablist" aria-label="Choose testimonial"></div>
+  </div>
+</section>
+
+<!-- CLIENTS MARQUEE -->
+<div class="clients" aria-hidden="true">
+  <div class="marquee"><div class="mq-track">
+    <span>Meridian Bank <em>/</em> Fleetline <em>/</em> Helix Health <em>/</em> Northwind Retail <em>/</em> Volt Energy <em>/</em> Kestrel Air <em>/</em></span>
+    <span>Meridian Bank <em>/</em> Fleetline <em>/</em> Helix Health <em>/</em> Northwind Retail <em>/</em> Volt Energy <em>/</em> Kestrel Air <em>/</em></span>
+  </div></div>
+</div>
+
+<!-- CTA -->
+<section class="cta" id="contact">
+  <div class="wrap">
+    <p class="eyebrow" data-reveal>05 // Contact</p>
+    <h2 class="disp h-mask" data-reveal style="font-size:clamp(2.6rem,7vw,5.4rem)">
+      <span class="ml"><span>Got a system that</span></span>
+      <span class="ml"><span>keeps you up</span></span>
+      <span class="ml"><span>at night<span class="acid">?</span></span></span>
+    </h2>
+    <a class="cta-mail" href="mailto:hello@octetlabs.io" data-reveal style="--d:.3s">hello@octetlabs.io</a>
+    <div class="cta-row" data-reveal style="--d:.45s">
+      <a href="mailto:hello@octetlabs.io?subject=30-min%20audit" class="btn btn-solid">Book a 30-min audit <span class="arr">→</span></a>
+      <span class="cta-note">We reply within one business day — usually faster than your incident channel.</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap f-grid">
+    <div class="f-brand">
+      <a href="#top" class="logo">OCTET<b>//</b>LABS</a>
+      <p>An infrastructure-first engineering studio. We build the machinery behind products people can't live without.</p>
+    </div>
+    <div class="f-col">
+      <h4>Sitemap</h4>
+      <ul><li><a href="#services">Capabilities</a></li><li><a href="#work">Work</a></li><li><a href="#process">Process</a></li><li><a href="#contact">Contact</a></li></ul>
+    </div>
+    <div class="f-col">
+      <h4>Capabilities</h4>
+      <ul><li>Cloud architecture</li><li>Platform engineering</li><li>Security &amp; compliance</li><li>Data &amp; AI pipelines</li><li>SRE / 24-7 ops</li></ul>
+    </div>
+    <div class="f-col">
+      <h4>Status</h4>
+      <ul class="f-status">
+        <li><i class="dot"></i>All systems operational</li>
+        <li>Fleet uptime — 99.98%</li>
+        <li>Last incident — 147 days ago</li>
+        <li style="margin-top:.6rem;color:var(--bone)">+44 20 7946 0958</li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap f-bottom">
+    <span>© 2025 Octet Labs Ltd. — built in the terminal.</span>
+    <span>51.5072°N / 0.1276°W</span>
+    <a href="#top">Back to top ↑</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $  = (s,c)=> (c||document).querySelector(s);
+const $$ = (s,c)=> Array.from((c||document).querySelectorAll(s));
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+/* ---- UTC clock ---- */
+const clockEl = $('#clock');
+function tick(){
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  clockEl.textContent = `UTC ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())}`;
+}
+tick(); setInterval(tick,1000);
+
+/* ---- header scroll state ---- */
+const hdr = $('#siteHeader');
+addEventListener('scroll',()=>hdr.classList.toggle('scrolled',scrollY>12),{passive:true});
+
+/* ---- mobile nav ---- */
+const burger=$('#burger');
+burger.addEventListener('click',()=>{
+  const open=document.body.classList.toggle('nav-open');
+  burger.setAttribute('aria-expanded',open);
+});
+$$('#mnav a').forEach(a=>a.addEventListener('click',()=>{document.body.classList.remove('nav-open');burger.setAttribute('aria-expanded','false')}));
+
+/* ---- scramble decode (hero) ---- */
+const CH='#01<>/[]{}=+*^?_—';
+function scramble(el,delay){
+  const final=el.dataset.scramble;
+  if(RM){el.textContent=final;return;}
+  let frame=0; const dur=34+final.length*2.2;
+  setTimeout(()=>{
+    (function step(){
+      frame++;
+      const prog=frame/dur; let out='';
+      for(let i=0;i<final.length;i++){
+        if(final[i]===' '){out+=' ';continue;}
+        out += i < prog*final.length ? final[i] : CH[Math.floor(Math.random()*CH.length)];
+      }
+      el.textContent=out;
+      frame<dur ? requestAnimationFrame(step) : el.textContent=final;
+    })();
+  },delay);
+}
+$$('[data-scramble]').forEach((el,i)=>scramble(el,200+i*320));
+
+/* ---- terminal typewriter loop ---- */
+const termBody=$('#termBody');
+const LINES=[
+  {t:'$ octet deploy --prod',c:'cmd'},
+  {t:'▸ compiling services… done in 41s (cache hit)',c:'dim'},
+  {t:'✓ 128/128 containers healthy',c:'ok'},
+  {t:'✓ p99 latency 38ms · error rate 0.00%',c:'ok'},
+  {t:'✓ zero-downtime cutover complete',c:'ok'},
+  {t:'',c:''},
+  {t:'$ octet status --fleet',c:'cmd'},
+  {t:'uptime 99.98% · 312 systems · 6 regions',c:'hl'}
+];
+function renderStatic(){
+  termBody.innerHTML='';
+  LINES.forEach(L=>{const d=document.createElement('div');d.className='tl '+(L.c||'');d.textContent=L.t;termBody.appendChild(d);});
+}
+async function runTerm(){
+  while(true){
+    termBody.innerHTML='';
+    for(const L of LINES){
+      const div=document.createElement('div');div.className='tl '+(L.c||'');termBody.appendChild(div);
+      if(!L.t){await sleep(260);continue;}
+      for(let i=1;i<=L.t.length;i++){div.textContent=L.t.slice(0,i);await sleep(L.c==='cmd'?48:17);}
+      await sleep(L.c?380:120);
+    }
+    const p=document.createElement('div');p.className='tl cmd';p.innerHTML='$ <span class="cur">▮</span>';termBody.appendChild(p);
+    await sleep(6500);
+  }
+}
+RM ? renderStatic() : runTerm();
+
+/* ---- reveal on scroll ---- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.15});
+$$('[data-reveal], .sec-head, #procGrid').forEach(el=>io.observe(el));
+
+/* ---- counters ---- */
+function animateCount(el){
+  const target=parseFloat(el.dataset.count), dec=+(el.dataset.decimals||0);
+  const pre=el.dataset.prefix||'', suf=el.dataset.suffix||'';
+  if(RM){el.textContent=pre+target.toFixed(dec)+suf;return;}
+  const dur=1700; let start=null;
+  (function step(ts){
+    if(!start)start=ts;
+    const p=Math.min((ts-start)/dur,1), e=1-Math.pow(2,-10*p);
+    el.textContent=pre+(target*e).toFixed(dec)+suf;
+    p<1 ? requestAnimationFrame(step) : el.textContent=pre+target.toFixed(dec)+suf;
+  })(performance.now());
+}
+const cio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){animateCount(e.target);cio.unobserve(e.target);}}),{threshold:.5});
+$$('.m-num').forEach(el=>cio.observe(el));
+
+/* ---- services accordion (single open) ---- */
+$$('.svc-head').forEach(btn=>btn.addEventListener('click',()=>{
+  const item=btn.closest('.svc'), wasOpen=item.classList.contains('open');
+  $$('.svc.open').forEach(s=>{s.classList.remove('open');$('.svc-head',s).setAttribute('aria-expanded','false');});
+  if(!wasOpen){item.classList.add('open');btn.setAttribute('aria-expanded','true');}
+}));
+
+/* ---- work index + progress bar ---- */
+const cards=$$('.cs-card'), idxEl=$('#workIdx'), barEl=$('#workBar');
+const wio=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){
+    const i=cards.indexOf(e.target);
+    idxEl.textContent=String(i+1).padStart(2,'0');
+    barEl.style.width=((i+1)/cards.length*100)+'%';
+  }
+}),{rootMargin:'-45% 0px -45% 0px'});
+cards.forEach(c=>wio.observe(c));
+
+/* ---- quote rotator ---- */
+const quotes=$$('.quote-item'), dotsWrap=$('#qDots'); let qi=0;
+quotes.forEach((_,i)=>{
+  const b=document.createElement('button');
+  b.className='q-dot'+(i===0?' active':'');b.setAttribute('aria-label','Testimonial '+(i+1));
+  b.addEventListener('click',()=>setQ(i));dotsWrap.appendChild(b);
+});
+const dots=$$('.q-dot');
+function setQ(i){qi=i;quotes.forEach((q,j)=>q.classList.toggle('active',j===i));dots.forEach((d,j)=>d.classList.toggle('active',j===i));}
+if(!RM) setInterval(()=>setQ((qi+1)%quotes.length),6000);
+
+/* ---- mouse coordinate readout ---- */
+const coords=$('#coords'); let mx=0,my=0,raf=null;
+addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  if(!raf)raf=requestAnimationFrame(()=>{
+    coords.textContent=`X:${String(mx).padStart(4,'0')} Y:${String(my).padStart(4,'0')}`;raf=null;
+  });
+},{passive:true});
+})();
+</script>
+</body>
+</html>

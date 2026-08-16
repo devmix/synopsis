@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synopsis RAG — Zero-Infrastructure Knowledge Graph & Hybrid Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0a0e14;
+            --bg-card: #111827;
+            --bg-card-hover: #1f2937;
+            --border: #1f2937;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-cyan: #06b6d4;
+            --accent-violet: #8b5cf6;
+            --accent-emerald: #10b981;
+        }
+
+        * {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            background-image:
+                    radial-gradient(circle at 15% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 25%),
+                    radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 25%);
+            overflow-x: hidden;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-violet) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card {
+            background-color: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(6, 182, 212, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.2);
+        }
+
+        .glow-btn {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .glow-btn:hover {
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .terminal-window {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            box-shadow: 0 20px 40px -20px rgba(0,0,0,0.8);
+        }
+
+        .terminal-header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .arch-node {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .arch-node:hover {
+            background: rgba(6, 182, 212, 0.1);
+            border-color: var(--accent-cyan);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-base);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="fixed w-full z-50 backdrop-blur-md bg-[#0a0e14]/80 border-b border-gray-800/50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <svg class="w-8 h-8 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            <span class="font-bold text-xl">Synopsis<span class="text-cyan-400">[MEMEX]</span></span>
+        </div>
+        <div class="hidden md:flex items-center space-x-8 text-sm text-gray-400">
+            <a href="#architecture" class="hover:text-white transition">Architecture</a>
+            <a href="#features" class="hover:text-white transition">Features</a>
+            <a href="#flow" class="hover:text-white transition">Data Flow</a>
+            <a href="#tech" class="hover:text-white transition">Decisions</a>
+        </div>
+        <a href="#" class="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg text-sm transition">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.91 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.59-2.805 5.595-5.475 5.895.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            <span>Star on GitHub</span>
+        </a>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<header class="pt-40 pb-20 px-6">
+    <div class="max-w-5xl mx-auto text-center">
+        <div class="inline-flex items-center space-x-2 bg-gray-900/50 border border-gray-800 rounded-full px-4 py-1.5 mb-6 text-sm text-gray-400">
+            <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+            <span>Open Source · Go · SQLite · MCP Protocol</span>
+        </div>
+        <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
+            Zero-Infrastructure <br>
+            <span class="gradient-text">RAG & Knowledge Graph</span>
+        </h1>
+        <p class="text-xl text-gray-400 max-w-3xl mx-auto mb-10">
+            A single Go binary combining hybrid search (BM25 + Vector) with an in-memory knowledge graph. Exposed natively to AI tools via Model Context Protocol (MCP). No Python, no Postgres, no Docker. Just pure performance.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <a href="#quickstart" class="glow-btn bg-cyan-500 text-black font-bold px-8 py-3 rounded-lg flex items-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <span>Quick Start</span>
+            </a>
+            <a href="#architecture" class="bg-gray-800 hover:bg-gray-700 text-white font-semibold px-8 py-3 rounded-lg border border-gray-700 transition flex items-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                <span>Read Architecture</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Terminal Window -->
+    <div id="quickstart" class="max-w-3xl mx-auto mt-24 reveal">
+        <div class="terminal-window mx-auto">
+            <div class="terminal-header flex items-center space-x-2 px-4 py-3">
+                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span class="ml-4 text-xs text-gray-400 font-mono">root@synopsis:~</span>
+            </div>
+            <div class="p-6 font-mono text-sm text-left">
+                <div class="flex items-center text-gray-500"><span class="mr-2 text-emerald-400">$</span> go install github.com/synopsis-rag/cmd/app@latest</div>
+                <div class="flex items-center text-gray-500 mt-2"><span class="mr-2 text-emerald-400">$</span> synopsis ingest --config config.default.yaml</div>
+                <div class="mt-4 pl-4 border-l border-gray-700 text-gray-400 text-xs">
+                    <div>✓ Parsing documents (.md, .json, .html)</div>
+                    <div>✓ Generating embeddings (ONNX / BGE-M3)</div>
+                    <div>✓ Extracting entities (NER + LLM)</div>
+                    <div>✓ Building knowledge graph & facts</div>
+                </div>
+                <div class="flex items-center text-gray-500 mt-2"><span class="mr-2 text-emerald-400">$</span> synopsis serve</div>
+                <div class="mt-4 pl-4 border-l border-gray-700 text-gray-400 text-xs">
+                    <div>🚀 MCP Server listening on :8080/sse</div>
+                    <div>👁️ File watcher active (auto-update enabled)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Architecture Section -->
+<section id="architecture" class="py-24 px-6 border-t border-gray-800/50">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16 reveal">
+            <h2 class="text-4xl font-bold mb-4">System <span class="gradient-text">Architecture</span></h2>
+            <p class="text-gray-400 max-w-2xl mx-auto">A tightly integrated monolith designed for minimal operational overhead. Everything runs in a single process.</p>
+        </div>
+
+        <!-- System Diagram -->
+        <div class="bg-gray-900/50 border border-gray-800 rounded-2xl p-8 md:p-16 font-mono text-xs md:text-sm text-gray-400 relative overflow-hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 relative z-10">
+                <div class="arch-node p-4 rounded-lg text-center">
+                    <div class="text-cyan-400 font-bold mb-1">Ingestion Pipeline</div>
+                    <div class="text-gray-500 text-xs">Parse → Chunk</div>
+                </div>
+                <div class="arch-node p-4 rounded-lg text-center">
+                    <div class="text-cyan-400 font-bold mb-1">Embedding Provider</div>
+                    <div class="text-gray-500 text-xs">ONNX / API</div>
+                </div>
+                <div class="arch-node p-4 rounded-lg text-center bg-violet-500/10 border-violet-500/30">
+                    <div class="text-violet-400 font-bold mb-1">Database (SQLite)</div>
+                    <div class="text-gray-500 text-xs">FTS5 + vec0 + Relational</div>
+                </div>
+            </div>
+
+            <div class="hidden md:block absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-px h-32 bg-gray-700"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                <div class="arch-node p-4 rounded-lg text-center">
+                    <div class="text-emerald-400 font-bold mb-1">Knowledge Graph</div>
+                    <div class="text-gray-500 text-xs">In-memory (BFS, O(1) Lookup)</div>
+                </div>
+                <div class="arch-node p-4 rounded-lg text-center">
+                    <div class="text-emerald-400 font-bold mb-1">MCP Server</div>
+                    <div class="text-gray-500 text-xs">HTTP/SSE Transport</div>
+                </div>
+            </div>
+
+            <div class="mt-12 arch-node p-4 rounded-lg text-center border-dashed">
+                <div class="text-gray-400 font-bold">File Watcher (Auto-Update)</div>
+                <div class="text-gray-600 text-xs">fsnotify · 30s debounce</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Features / Modules -->
+<section id="features" class="py-24 px-6 border-t border-gray-800/50">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16 reveal">
+            <h2 class="text-4xl font-bold mb-4">Core <span class="gradient-text">Modules</span></h2>
+            <p class="text-gray-400 max-w-2xl mx-auto">Engineered with strict boundaries and dependency injection.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Feature 1 -->
+            <div class="card p-6 rounded-xl reveal">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-cyan-500/10 rounded-lg flex items-center justify-center text-cyan-400 mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold">Hybrid Search Engine</h3>
+                </div>
+                <p class="text-gray-400 text-sm mb-4">Combines Lexical (FTS5/BM25) and Semantic (vec0/Cosine) search using Reciprocal Rank Fusion (RRF, k=60).</p>
+                <ul class="text-xs text-gray-500 space-y-1 font-mono">
+                    <li class="flex items-center"><span class="text-cyan-500 mr-2">›</span> Parallel goroutine execution</li>
+                    <li class="flex items-center"><span class="text-cyan-500 mr-2">›</span> Enricher + Reranker pipeline</li>
+                    <li class="flex items-center"><span class="text-cyan-500 mr-2">›</span> Freshness & Authority boosts</li>
+                </ul>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="card p-6 rounded-xl reveal">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-violet-500/10 rounded-lg flex items-center justify-center text-violet-400 mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold">In-Memory Graph</h3>
+                </div>
+                <p class="text-gray-400 text-sm mb-4">Loads entire entity graph at startup for O(1) lookups and fast BFS traversal (max depth 10).</p>
+                <ul class="text-xs text-gray-500 space-y-1 font-mono">
+                    <li class="flex items-center"><span class="text-violet-500 mr-2">›</span> Domain-specific XML configs</li>
+                    <li class="flex items-center"><span class="text-violet-500 mr-2">›</span> Fact Review Workflow</li>
+                    <li class="flex items-center"><span class="text-violet-500 mr-2">›</span> Graphviz DOT export</li>
+                </ul>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="card p-6 rounded-xl reveal">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400 mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold">MCP Server</h3>
+                </div>
+                <p class="text-gray-400 text-sm mb-4">Exposes tools natively to Claude Desktop and Cursor via HTTP/SSE transport. Self-documenting API.</p>
+                <ul class="text-xs text-gray-500 space-y-1 font-mono">
+                    <li class="flex items-center"><span class="text-emerald-500 mr-2">›</span> hybrid_search tool</li>
+                    <li class="flex items-center"><span class="text-emerald-500 mr-2">›</span> get_entity_relations tool</li>
+                    <li class="flex items-center"><span class="text-emerald-500 mr-2">›</span> Graceful shutdown (SIGINT)</li>
+                </ul>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="card p-6 rounded-xl reveal">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-cyan-500/10 rounded-lg flex items-center justify-center text-cyan-400 mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold">Local Embeddings</h3>
+                </div>
+                <p class="text-gray-400 text-sm mb-4">Pure Go binary using ONNX Runtime. No Python required. INT8 quantized BGE-M3 runs efficiently on CPU.</p>
+                <ul class="text-xs text-gray-500 space-y-1 font-mono">
+                    <li class="flex items-center"><span class="text-cyan-500 mr-2">›</span> L2-normalized vectors</li>
+                    <li class="flex items-center"><span class="text-cyan-500 mr-2">›</span> In-memory cache shared</li>
+                    <li class="flex items-center"><span class="text-cyan-500 mr-2">›</span> OpenAI API fallback</li>
+                </ul>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="card p-6 rounded-xl reveal">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-violet-500/10 rounded-lg flex items-center justify-center text-violet-400 mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold">Fact Review Workflow</h3>
+                </div>
+                <p class="text-gray-400 text-sm mb-4">LLM-extracted facts go through confidence-based validation: Draft → Pending → Approved/Rejected.</p>
+                <ul class="text-xs text-gray-500 space-y-1 font-mono">
+                    <li class="flex items-center"><span class="text-violet-500 mr-2">›</span> Provenance tracking</li>
+                    <li class="flex items-center"><span class="text-violet-500 mr-2">›</span> Auto-publish thresholds</li>
+                    <li class="flex items-center"><span class="text-violet-500 mr-2">›</span> Traceability to chunks</li>
+                </ul>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="card p-6 rounded-xl reveal">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400 mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold">File Watcher</h3>
+                </div>
+                <p class="text-gray-400 text-sm mb-4">Auto-updates the knowledge base during serve mode using fsnotify. Debounces events to prevent spam.</p>
+                <ul class="text-xs text-gray-500 space-y-1 font-mono">
+                    <li class="flex items-center"><span class="text-emerald-500 mr-2">›</span> Recursive directory monitoring</li>
+                    <li class="flex items-center"><span class="text-emerald-500 mr-2">›</span> 30s debounce default</li>
+                    <li class="flex items-center"><span class="text-emerald-500 mr-2">›</span> Filters .md and .json</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Data Flow Section -->
+<section id="flow" class="py-24 px-6 border-t border-gray-800/50 bg-gray-900/20">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16 reveal">
+            <h2 class="text-4xl font-bold mb-4">Data <span class="gradient-text">Flow</span></h2>
+            <p class="text-gray-400 max-w-2xl mx-auto">From raw files to enriched context for your LLM.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Ingestion Flow -->
+            <div class="bg-gray-900/50 border border-gray-800 rounded-xl p-8 reveal">
+                <h3 class="text-2xl font-bold mb-6 text-cyan-400 flex items-center">
+                    <span class="bg-cyan-500/20 text-cyan-400 rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">1</span>
+                    Ingestion Pipeline
+                </h3>
+                <div class="space-y-6 pl-4 border-l-2 border-gray-800 ml-4">
+                    <div class="relative">
+                        <div class="absolute -left-[26px] top-1 w-4 h-4 bg-gray-800 border-2 border-cyan-500 rounded-full"></div>
+                        <h4 class="font-bold text-white">Parsing & Chunking</h4>
+                        <p class="text-sm text-gray-500">Markdown, JSON, HTML, MediaWiki. Header-based or fixed-size chunking with overlap.</p>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -left-[26px] top-1 w-4 h-4 bg-gray-800 border-2 border-cyan-500 rounded-full"></div>
+                        <h4 class="font-bold text-white">Embeddings & Storage</h4>
+                        <p class="text-sm text-gray-500">ONNX generates vectors -> stored in vec0. Text stored in chunks + FTS5 sync triggers.</p>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -left-[26px] top-1 w-4 h-4 bg-gray-800 border-2 border-cyan-500 rounded-full"></div>
+                        <h4 class="font-bold text-white">NER & Graph Construction</h4>
+                        <p class="text-sm text-gray-500">Prose or LLM extracts entities. Deduplication links them to chunks and builds relations.</p>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -left-[26px] top-1 w-4 h-4 bg-gray-800 border-2 border-cyan-500 rounded-full"></div>
+                        <h4 class="font-bold text-white">Fact Extraction & Provenance</h4>
+                        <p class="text-sm text-gray-500">Structured facts extracted, assigned confidence scores, and routed through review workflow.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Flow -->
+            <div class="bg-gray-900/50 border border-gray-800 rounded-xl p-8 reveal">
+                <h3 class="text-2xl font-bold mb-6 text-violet-400 flex items-center">
+                    <span class="bg-violet-500/20 text-violet-400 rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">2</span>
+                    Query Execution
+                </h3>
+                <div class="space-y-6 pl-4 border-l-2 border-gray-800 ml-4">
+                    <div class="relative">
+                        <div class="absolute -left-[26px] top-1 w-4 h-4 bg-gray-800 border-2 border-violet-500 rounded-full"></div>
+                        <h4 class="font-bold text-white">Parallel Search</h4>
+                        <p class="text-sm text-gray-500">MCP Client calls <code class="text-xs bg-gray-800 p-1 rounded">hybrid_search</code>. FTS5 (BM25) and vec0 (KNN) run concurrently.</p>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -left-[26px] top-1 w-4 h-4 bg-gray-800 border-2 border-violet-500 rounded-full"></div>
+                        <h4 class="font-bold text-white">RRF Fusion & Enrichment</h4>
+                        <p class="text-sm text-gray-500">Reciprocal Rank Fusion merges lists. Enricher attaches document metadata and associated entities.</p>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -left-[26px] top-1 w-4 h-4 bg-gray-800 border-2 border-violet-500 rounded-full"></div>
+                        <h4 class="font-bold text-white">Business Rule Reranking</h4>
+                        <p class="text-sm text-gray-500">Deprecation penalties, authority boosts (policies x1.5), and freshness boosts (90 days).</p>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -left-[26px] top-1 w-4 h-4 bg-gray-800 border-2 border-violet-500 rounded-full"></div>
+                        <h4 class="font-bold text-white">Graph Expansion</h4>
+                        <p class="text-sm text-gray-500">BFS traversal on result entities attaches related edges and <code class="text-xs bg-gray-800 p-1 rounded">approved</code> facts to the context.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tech Decisions Section -->
+<section id="tech" class="py-24 px-6 border-t border-gray-800/50">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16 reveal">
+            <h2 class="text-4xl font-bold mb-4">Technology <span class="gradient-text">Decisions</span></h2>
+            <p class="text-gray-400 max-w-2xl mx-auto">Why we chose specific tools over mainstream alternatives.</p>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Decision 1 -->
+            <div class="card p-6 rounded-xl grid grid-cols-1 md:grid-cols-3 gap-6 reveal">
+                <div class="md:col-span-1">
+                    <h3 class="text-lg font-bold text-cyan-400">SQLite over PostgreSQL</h3>
+                    <span class="text-xs text-gray-500 font-mono">Zero Infrastructure</span>
+                </div>
+                <div class="md:col-span-2 text-gray-400 text-sm">
+                    No separate DB server to manage. FTS5 and sqlite-vec (vec0) are built-in. WAL mode supports concurrent reads during ingestion, which is more than sufficient for documentation scale (tens of thousands of chunks).
+                </div>
+            </div>
+
+            <!-- Decision 2 -->
+            <div class="card p-6 rounded-xl grid grid-cols-1 md:grid-cols-3 gap-6 reveal">
+                <div class="md:col-span-1">
+                    <h3 class="text-lg font-bold text-violet-400">ONNX Runtime over Hugging Face</h3>
+                    <span class="text-xs text-gray-500 font-mono">Pure Go Binary</span>
+                </div>
+                <div class="md:col-span-2 text-gray-400 text-sm">
+                    No Python dependency. INT8 quantized BGE-M3 runs efficiently on CPU (~1024-dim vectors). Fully offline operation with no API keys required. Falls back to OpenAI-compatible API if needed.
+                </div>
+            </div>
+
+            <!-- Decision 3 -->
+            <div class="card p-6 rounded-xl grid grid-cols-1 md:grid-cols-3 gap-6 reveal">
+                <div class="md:col-span-1">
+                    <h3 class="text-lg font-bold text-emerald-400">RRF over Weighted Scoring</h3>
+                    <span class="text-xs text-gray-500 font-mono">Reciprocal Rank Fusion</span>
+                </div>
+                <div class="md:col-span-2 text-gray-400 text-sm">
+                    No need to normalize different score scales (BM25 vs Cosine distance). Items appearing in both lists naturally rise to the top. Single tunable parameter (k=60) proven effective per Craswell et al., TREC 2021.
+                </div>
+            </div>
+
+            <!-- Decision 4 -->
+            <div class="card p-6 rounded-xl grid grid-cols-1 md:grid-cols-3 gap-6 reveal">
+                <div class="md:col-span-1">
+                    <h3 class="text-lg font-bold text-cyan-400">MCP over REST/GraphQL</h3>
+                    <span class="text-xs text-gray-500 font-mono">Model Context Protocol</span>
+                </div>
+                <div class="md:col-span-2 text-gray-400 text-sm">
+                    Native integration with Claude Desktop and Cursor. Tool schema is declarative and self-documenting. Designed specifically for LLM agent consumption rather than human browsing via standard HTTP/SSE.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-12 px-6 border-t border-gray-800/50">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
+        <div class="flex items-center space-x-2 mb-4 md:mb-0">
+            <svg class="w-6 h-6 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            <span class="font-bold">Synopsis<span class="text-cyan-400">RAG</span></span>
+            <span class="text-gray-600 text-sm ml-2 font-mono">v1.0.0</span>
+        </div>
+        <div class="flex space-x-6 text-gray-500 text-sm">
+            <a href="#" class="hover:text-white transition">Documentation</a>
+            <a href="#" class="hover:text-white transition">License (MIT)</a>
+            <a href="#" class="hover:text-white transition">Contributing</a>
+        </div>
+    </div>
+    <div class="max-w-7xl mx-auto text-center text-gray-700 text-xs mt-8 font-mono">
+        Built with Go · SQLite · ONNX · MCP
+    </div>
+</footer>
+
+<script>
+    // Reveal on scroll
+    const reveals = document.querySelectorAll('.reveal');
+
+    const revealOnScroll = () => {
+        const windowHeight = window.innerHeight;
+        const elementVisible = 100;
+
+        reveals.forEach((reveal) => {
+            const elementTop = reveal.getBoundingClientRect().top;
+            if (elementTop < windowHeight - elementVisible) {
+                reveal.classList.add('active');
+            }
+        });
+    };
+
+    window.addEventListener('scroll', revealOnScroll);
+    // Trigger initially for items in view
+    revealOnScroll();
+</script>
+</body>
+</html>

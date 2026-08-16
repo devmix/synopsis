@@ -1,0 +1,100 @@
+---
+title: CI/CD
+description: GitHub Actions workflows — CI (test, lint, cross-compile, coverage) and release (tag-triggered multi-platform builds) — plus the cross-compilation matrix
+sidebar_position: 7
+---
+
+# CI/CD
+
+Two GitHub Actions workflows live in `.github/workflows/`: **`ci.yml`** runs on every push and pull request to `main`; **`release.yml`** builds and publishes binaries on version tags.
+
+## CI workflow (`ci.yml`)
+
+```yaml
+on:
+  push:            branches: [main]
+  pull_request:    branches: [main]
+
+concurrency:       # cancel in-progress runs when a new commit lands
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GO_VERSION: "1.25.5"
+  ZIG_VERSION: "0.14.0"
+```
+
+Four parallel jobs (all on `ubuntu-latest`):
+
+| Job | Steps |
+|---|---|
+| **Test** | install `gcc` + `libsqlite3-dev` (CGO needs the C toolchain) → `go mod download` → `go test -race -v ./...` |
+| **Lint** | `golangci/golangci-lint-action@v6` (version `latest`, args `./...`) |
+| **Build** | per-platform matrix (5 platforms, `fail-fast: false`): install Zig → `go mod download` → `./scripts/build.sh <platform>` → upload artifact `binary-<platform>` (retention 7 days) |
+| **Coverage** | `go test -race -coverprofile=coverage.out -covermode=atomic ./...` → print the total with `go tool cover -func=coverage.out` → upload to Codecov (`codecov/codecov-action@v5`, `fail_ci_if_error: false` — a Codecov outage must not fail CI) |
+
+Notes:
+
+- Both `test` and `coverage` run with `-race` — the same gate you run locally (`make test`).
+- The cross-build job is a single source of truth for "does this compile for every platform": it uses the shared `scripts/build.sh` (the same script the `make build-*` targets mirror, see [Development Setup](./setup#cross-compilation)).
+
+## Release workflow (`release.yml`)
+
+Triggered by **push tags matching `v*`** (for example `v0.1.0`).
+
+### Build matrix
+
+| Runner | GOOS / GOARCH | Binary artifact |
+|---|---|---|
+| `ubuntu-latest` | `linux` / `amd64` | `synopsis-linux-amd64` |
+| `ubuntu-latest` | `linux` / `arm64` | `synopsis-linux-arm64` |
+| `macos-13` (Intel) | `darwin` / `amd64` | `synopsis-darwin-amd64` |
+| `macos-latest` (ARM) | `darwin` / `arm64` | `synopsis-darwin-arm64` |
+| `windows-latest` | `windows` / `amd64` | `synopsis-windows-amd64.exe` |
+
+Each leg (Go 1.25.5, module caching via `actions/cache`):
+
+1. `go build` with `CGO_ENABLED=1` and the matrix `GOOS`/`GOARCH` — these are **native** runner builds (each platform builds on its own hardware), which is also why Linux arm64 is built on `ubuntu-latest`.
+2. `actions/upload-artifact@v4` (retention 5 days).
+
+### Publishing
+
+The `release` job (depends on `build`, `ubuntu-latest`):
+
+1. Downloads all five artifacts.
+2. Packs each platform directory into `synopsis-<platform>.tar.gz`.
+3. Creates the GitHub release with `softprops/action-gh-release@v2`: files `synopsis-*.tar.gz`, auto-generated release notes.
+
+Note the naming difference: release artifacts use the OS name (`synopsis-darwin-arm64`), while the local Makefile cross-build targets use `macos` (`bin/synopsis-macos-arm64`). Same binaries, different labels.
+
+## Cross-compilation matrix
+
+Both the Makefile and `scripts/build.sh` (CI) cross-compile **from the host** by using Zig as the C toolchain — no per-platform sysroots:
+
+| Platform | Zig target triple | GOOS / GOARCH | CGO specifics |
+|---|---|---|---|
+| `linux-amd64` | `x86_64-linux-gnu` | `linux` / `amd64` | `sqlite3.h` symlink into `CGO_CFLAGS` |
+| `linux-arm64` | `aarch64-linux-gnu` | `linux` / `arm64` | same |
+| `windows-amd64` | `x86_64-windows` | `windows` / `amd64` | same; output gets `.exe` |
+| `macos-amd64` | `x86_64-macos` | `darwin` / `amd64` | extra: `scripts/darwin-stubs/` + Zig's bundled macOS SDK, `-Wl,-undefined,dynamic_lookup`, `-ldflags=-w` |
+| `macos-arm64` | `aarch64-macos` | `darwin` / `arm64` | same |
+
+Why Zig: `go-sqlite3` and the vec0 bindings need a C compile at build time, and Zig's `cc` can emit C objects for any of these targets from a single host. Details (the header symlink trick, the macOS stubs): [Development Setup — Cross-compilation](./setup#cross-compilation).
+
+## Release flow
+
+```
+git tag v0.1.0 && git push origin v0.1.0
+      │
+      ▼
+release.yml: 5 native builds → 5 artifacts → tar.gz archives
+      │
+      ▼
+GitHub Release (v0.1.0) with synopsis-<platform>.tar.gz + generated notes
+```
+
+## See also
+
+- [Development Setup](./setup) — local builds, Makefile targets, cross-compilation with Zig
+- [Testing](./testing) — what the CI test/coverage jobs run
+- [CLI Reference](../reference/cli) — what the released binary does
