@@ -4,8 +4,6 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
-const baseUrl = 'synopsis/docs/website/build/';
-
 const config: Config = {
     title: 'synopsis[memex]',
     tagline: 'Zero-Infrastructure RAG & Knowledge Graph',
@@ -19,8 +17,11 @@ const config: Config = {
         mermaid: true,
     },
 
+    // Navbar scroll state: transparent at top → blurred after 12px (NAVBAR-V5-STYLE).
+    clientModules: ['./src/client/navbar-scroll'],
+
     url: 'https://devmix.github.io',
-    baseUrl,
+    baseUrl: 'synopsis/docs/website/build/',
 
     organizationName: 'devmix',
     projectName: 'synopsis',
@@ -54,7 +55,6 @@ const config: Config = {
         // files under src/ are only bundled when imported and are never served as
         // raw assets — a './src/css/...' href here would 404/fall back to the SPA.
         // Absolute URL derived from baseUrl so it resolves on every route (dev + prod).
-        `/${baseUrl}css/tokens.css`,
     ],
 
     presets: [
@@ -103,10 +103,11 @@ const config: Config = {
             },
         },
         navbar: {
-            title: 'synopsis[memex]',
+            // Text wordmark (mono) + accent dot, per .mockups/index-v5.html.
+            title: 'synopsis_',
             logo: {
                 alt: 'Synopsis Logo',
-                src: 'img/logo.svg',
+                src: 'img/dot.svg',
             },
             items: [
                 {
@@ -114,6 +115,20 @@ const config: Config = {
                     sidebarId: 'tutorialSidebar',
                     position: 'left',
                     label: 'Docs',
+                },
+                // /docs/reference has no index page → point at the flagship reference doc.
+                // (Its folder's index.mdx keeps "/index" in its id on Docusaurus 3.10.)
+                {
+                    type: 'doc',
+                    docId: 'reference/mcp-tools/index',
+                    position: 'left',
+                    label: 'Reference',
+                },
+                {
+                    type: 'doc',
+                    docId: 'roadmap',
+                    position: 'left',
+                    label: 'Roadmap',
                 },
                 {
                     href: 'https://github.com/devmix/synopsis',
@@ -177,7 +192,7 @@ const config: Config = {
                     ],
                 },
             ],
-            copyright: `Copyright © ${new Date().getFullYear()} synopsis[memex] — structured information for AI agents via MCP. Go · SQLite · ONNX · MCP`,
+            copyright: `Copyright © ${new Date().getFullYear()} synopsis[memex] — structured information for AI agents via MCP.`,
         },
         prism: {
             theme: prismThemes.github,

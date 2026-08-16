@@ -21,7 +21,7 @@ export const TERMINAL_LINES: readonly TermLine[] = [
   {text: '$ ./synopsis serve', tone: 'cmd'},
   {text: '✓ mcp server → :8080/sse', tone: 'ok'},
   {text: '$ search {"query":"vacation policy","domain":"hr"}', tone: 'cmd'},
-  {text: '✓ 10 chunks · bm25+vector · rrf k=20', tone: 'hl'},
+  {text: '✓ 10 chunks · bm25+vector · rrf', tone: 'hl'},
 ];
 
 export const TICKER_ITEMS: readonly string[] = [
@@ -79,8 +79,8 @@ export const FEATURES: readonly Feature[] = [
     num: '/01',
     icon: <SearchIcon />,
     name: 'Hybrid Search',
-    desc: 'Lexical (BM25) and semantic (vector) retrieval run in parallel, fused with Reciprocal Rank Fusion (k=20) and reranked with authority and freshness boosts.',
-    tags: ['FTS5/BM25', 'sqlite-vec', 'RRF k=20'],
+    desc: 'Lexical (BM25) and semantic (vector) retrieval run in parallel, fused with Reciprocal Rank Fusion and reranked with authority and freshness boosts.',
+    tags: ['FTS5/BM25', 'sqlite-vec', 'RRF'],
   },
   {
     num: '/02',
@@ -108,14 +108,14 @@ export const FEATURES: readonly Feature[] = [
     icon: <LinkIcon />,
     name: 'Cross-Domain Linking',
     desc: 'The same entity across HR, IT, and Product is linked during ingestion — every link carries its method, confidence, and evidence.',
-    tags: ['rule / equals / llm', 'provenance'],
+    tags: ['CEL / equals / llm', 'provenance'],
   },
   {
     num: '/06',
     icon: <DomainIcon />,
     name: 'Domain-Based Config',
     desc: 'Sources, ontologies, and extraction methods are declared per domain in XML — HR, IT, Product, and your own vocabulary.',
-    tags: ['ontology xml', 'domains', 'sources'],
+    tags: ['ontology', 'domains', 'sources'],
   },
 ];
 
@@ -145,7 +145,7 @@ export const SEARCH_STEPS: readonly FlowStep[] = [
   },
   {
     title: 'RRF fusion',
-    desc: 'Reciprocal Rank Fusion (k=20) merges both rankings — no score normalization between lexicon and cosine.',
+    desc: 'Reciprocal Rank Fusion merges both rankings — no score normalization between lexicon and cosine.',
   },
   {
     title: 'Enrich & rerank',
