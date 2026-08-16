@@ -1,0 +1,36 @@
+.opencode/
+.task/
+/bin
+/dist
+
+# IDE
+.idea/
+.idea/workspace.xml
+
+# Distribution and build artifacts
+dist/
+*.tar.gz
+
+# SQLite databases
+*.db
+*.db-wal
+*.db-shm
+
+# Build binaries
+synopsis
+
+# Downloaded embedding models and ONNX Runtime libraries
+data/models/
+internal/embedding/data/
+# ONNX Runtime cache
+data/onnxruntime/
+# Binary in root dir only
+/app
+
+# Runtime data directories (backups, storage)
+data/backups/
+
+# Docusaurus website build artifacts
+docs/website/node_modules/
+docs/website/.docusaurus/
+docs/website/build/

@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  synopsis:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: synopsis-rag
+    restart: unless-stopped
+    ports:
+      - "8080:8080"   # MCP HTTP (SSE) endpoint
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./data:/app/data
+    environment:
+      - TZ=UTC
+
+  # Optional: Ollama service for API-based embeddings and LLM NER.
+  # Uncomment if using "api" mode for embeddings or LLM NER provider.
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: ollama
+  #   restart: unless-stopped
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+
+# volumes:
+#   ollama_data:

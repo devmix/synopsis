@@ -1,0 +1,94 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            binary_name: synopsis-linux-amd64
+          - runner: ubuntu-latest
+            goos: linux
+            goarch: arm64
+            binary_name: synopsis-linux-arm64
+          - runner: macos-13
+            goos: darwin
+            goarch: amd64
+            binary_name: synopsis-darwin-amd64
+          - runner: macos-latest
+            goos: darwin
+            goarch: arm64
+            binary_name: synopsis-darwin-arm64
+          - runner: windows-latest
+            goos: windows
+            goarch: amd64
+            binary_name: synopsis-windows-amd64.exe
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.OS }}-go-
+
+      - name: Build application
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '1'
+        run: |
+          mkdir -p dist
+          go build -o bin/${{ matrix.binary_name }} ./cmd/app/
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.binary_name }}
+          path: bin/
+          retention-days: 5
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create distribution archives
+        run: |
+          for dir in */; do
+            platform="${dir%/}"
+            echo "Creating archive for $platform..."
+            (cd "$platform" && tar -czf "../synopsis-$platform.tar.gz" .)
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            synopsis-*.tar.gz
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
