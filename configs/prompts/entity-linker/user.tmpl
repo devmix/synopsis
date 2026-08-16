@@ -1,0 +1,29 @@
+Determine if these two entities refer to the same real-world thing:
+
+---
+
+## Entity A
+- Name: {{ .EntityA.Name }}
+- Type: {{ .EntityA.Type }}
+- Domain: {{ .EntityA.Domain }}
+- Description: {{ .EntityA.Description }}
+
+{{ range $i, $chunk := .EntityA.Context -}}
+- Context [{{ $i }}]: {{ $chunk }}
+{{ end -}}
+
+---
+
+## Entity B
+- Name: {{ .EntityB.Name }}
+- Type: {{ .EntityB.Type }}
+- Domain: {{ .EntityB.Domain }}
+- Description: {{ .EntityB.Description }}
+
+{{ range $i, $chunk := .EntityB.Context -}}
+- Context [{{ $i }}]: {{ $chunk }}
+{{ end -}}
+
+---
+
+Respond with a JSON object containing "same_entity" (boolean), "confidence" (0.0-1.0), and "reasoning" (string, not more 100 symbols).

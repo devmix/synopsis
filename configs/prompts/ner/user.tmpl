@@ -1,0 +1,21 @@
+Extract entities and relations from the provided content in separate message.
+
+{{ if .EntityTypes -}}
+---
+Entity types to extract: {{ join ", " .EntityTypes }}
+{{ end -}}
+
+{{ if .RelationTypes -}}
+---
+Relation types to extract: {{ join ", " .RelationTypes }}
+{{ end -}}
+
+---
+
+IMPORTANT
+
+- Only extract entities and relations that are explicitly mentioned or clearly implied
+- Use the exact entity type IDs and relation type IDs from the schema
+- Return valid JSON even if nothing is found (use empty arrays)
+- Use the domain schema to guide your extraction.
+- Return only valid JSON in the specified format

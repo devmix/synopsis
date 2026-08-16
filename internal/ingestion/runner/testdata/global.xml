@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test fixture for runner unit tests. Contains minimal source definitions. -->
+<global>
+  <sources>
+    <source path="./testdata/srcA" type="markdown">
+      <domains><domain>hr</domain></domains>
+    </source>
+    <source path="./testdata/srcB" type="webpages">
+      <domains><domain>engineering</domain></domains>
+    </source>
+  </sources>
+</global>
