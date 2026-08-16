@@ -16,6 +16,8 @@ jobs:
   release:
     name: Build & publish (GoReleaser)
     runs-on: ubuntu-latest
+    env:
+      ZIG_VERSION: "0.16.0"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,12 +31,14 @@ jobs:
           cache: true
 
       # Symlink (not move) so Zig can resolve its bundled libraries, which
-      # the darwin cross-build needs for libSystem.tbd.
-      - name: Install Zig 0.16.0
+      # the darwin cross-build needs for libSystem.tbd. Asset layout since
+      # 0.16: zig-<arch>-<os>-<version>.tar.xz -> top dir of the same name.
+      - name: Install Zig ${{ env.ZIG_VERSION }}
         run: |
-          curl -fsSL "https://ziglang.org/builds/zig-linux-x86_64-0.16.0.tar.xz" \
-            | tar xfJ -C /opt/
-          ln -sf "/opt/zig-linux-x86_64-0.16.0/zig" /usr/local/bin/zig
+          curl -fsSLo /tmp/zig.tar.xz \
+            "https://ziglang.org/download/${{ env.ZIG_VERSION }}/zig-x86_64-linux-${{ env.ZIG_VERSION }}.tar.xz"
+          tar xfJ /tmp/zig.tar.xz -C /opt/
+          ln -sf "/opt/zig-x86_64-linux-${{ env.ZIG_VERSION }}/zig" /usr/local/bin/zig
           zig version
 
       - name: Run GoReleaser (release)
