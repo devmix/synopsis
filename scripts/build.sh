@@ -15,6 +15,9 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 BINARY_NAME="synopsis"
 OUTPUT_DIR="$PROJECT_ROOT/dist"
 
+# SQLite feature flags; without -DSQLITE_ENABLE_FTS5 go-sqlite3 silently drops FTS5.
+SQLITE_DEFS="-DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_VEC"
+
 # Zig's bundled minimal macOS SDK. libSystem.tbd parses cleanly, but the
 # libresolv/framework stubs use the legacy !libstubs format that Zig 0.16
 # rejects (NotLibStub) — so parseable replacements live in darwin-stubs/.
@@ -92,7 +95,7 @@ build_platform() {
   CGO_ENABLED=1 \
     CC="zig cc -target ${zig_target}" \
     CXX="zig c++ -target ${zig_target}" \
-    CGO_CFLAGS="-I${sqlite_include} -fno-sanitize=undefined" \
+    CGO_CFLAGS="${SQLITE_DEFS} -I${sqlite_include} -fno-sanitize=undefined" \
     CGO_LDFLAGS="$cgo_ldflags" \
     GOOS="$goos" \
     GOARCH="$goarch" \
