@@ -34,3 +34,7 @@ data/backups/
 docs/website/node_modules/
 docs/website/.docusaurus/
 docs/website/build/
+
+# Test coverage artifacts
+coverage.out
+coverage.html
