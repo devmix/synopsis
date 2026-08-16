@@ -12,9 +12,14 @@ DB_PATH := data/knowledge.db
 # SQLite feature flags; without -DSQLITE_ENABLE_FTS5 go-sqlite3 silently drops FTS5.
 SQLITE_DEFS := -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_VEC
 
+# Native (gcc) builds/tests must link libm explicitly: FTS5 bm25 scoring calls
+# log(), which lives in a separate libm.so on glibc where math is not merged
+# into libc. Harmless where it is, so set it on every native target.
+SQLITE_LDFLAGS := -lm
+
 # Default target builds for the current platform.
 build:
-	CGO_ENABLED=1 CGO_CFLAGS="$(SQLITE_DEFS) -O2" go build -o $(OUTPUT_DIR)/$(BINARY_NAME) ./cmd/app/
+	CGO_ENABLED=1 CGO_CFLAGS="$(SQLITE_DEFS) -O2" CGO_LDFLAGS="$(SQLITE_LDFLAGS)" go build -o $(OUTPUT_DIR)/$(BINARY_NAME) ./cmd/app/
 
 # --- Development targets ---
 
@@ -30,10 +35,10 @@ rebuild: build
 # --- Testing targets ---
 
 test:
-	go test -race ./...
+	CGO_CFLAGS="$(SQLITE_DEFS)" CGO_LDFLAGS="$(SQLITE_LDFLAGS)" go test -race ./...
 
 test-coverage:
-	go test -coverprofile=coverage.out -race ./...
+	CGO_CFLAGS="$(SQLITE_DEFS)" CGO_LDFLAGS="$(SQLITE_LDFLAGS)" go test -coverprofile=coverage.out -race ./...
 	go tool cover -html=coverage.out -o coverage.html
 
 lint:
