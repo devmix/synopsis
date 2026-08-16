@@ -21,7 +21,7 @@ If you only build and run for your own platform, Zig is not needed.
 ### Installing Zig (optional)
 
 ```bash
-# Linux (version 0.14.0, the same one CI uses)
+# Linux (any 0.14+ works locally; releases build with Zig 0.16)
 curl -L "https://ziglang.org/builds/zig-linux-x86_64-0.14.0.tar.xz" \
   | tar xfJ - -C /tmp/
 sudo mv /tmp/zig-linux-x86_64-0.14.0/zig /usr/local/bin/zig
@@ -71,7 +71,7 @@ See the [Quickstart](../quickstart) for what each stage does and how to make a f
 │   ├── prompts/  relations/  scheduler/  search/  utils/  watcher/
 │   └── ingestion/ sub-packages: chunkers/  entities/  ner/  parsers/  runner/  sources/
 ├── scripts/
-│   ├── build.sh                # cross-compilation via Zig (used by CI)
+│   ├── build.sh                # local cross-compilation via Zig (releases use GoReleaser)
 │   └── darwin-stubs/           # parseable macOS stubs for Zig-based CGO linking
 ├── site/                       # this documentation site (Docusaurus)
 ├── .github/workflows/          # ci.yml, release.yml
@@ -150,9 +150,9 @@ go build -o bin/synopsis-linux-arm64 ./cmd/app/
 
 Details worth knowing:
 
-- **SQLite header symlink.** The vec0 bindings include `#include "sqlite3.h"`. The Makefile (and `scripts/build.sh`, used by CI) create a temporary `sqlite3.h` → `sqlite3-binding.h` symlink from the `go-sqlite3` module and pass it through `CGO_CFLAGS=-I...`.
+- **SQLite header symlink.** The vec0 bindings include `#include "sqlite3.h"`. Locally the Makefile (and `scripts/build.sh`) create a temporary `sqlite3.h` → `sqlite3-binding.h` symlink from the `go-sqlite3` module and pass it through `CGO_CFLAGS=-I...`; in releases the GoReleaser before hook does the same ([CI/CD](./ci-cd#release-workflow-releaseyml)).
 - **macOS specifics.** macOS has no separate `libresolv`/`libdl`/`libpthread` (they live in `libSystem`), so the Darwin targets point Zig at the parseable stubs in `scripts/darwin-stubs/` first, then at Zig's bundled SDK, and link with `-Wl,-undefined,dynamic_lookup`. Builds pass `-ldflags=-w` (no DWARF) so Go skips its `dsymutil`/`strip` step, which would otherwise invoke a host GNU `strip` that cannot process Mach-O.
-- **CI parity.** GitHub Actions cross-builds all five platforms from `ubuntu-latest` via `./scripts/build.sh <platform>` — see [CI/CD](./ci-cd).
+- **Release parity.** The release workflow cross-builds all five targets from a single `ubuntu-latest` runner using the same Zig approach (via GoReleaser, not this script) — see [CI/CD](./ci-cd#cross-compilation). Keep the CGO_CFLAGS defines in sync between the Makefile and `.goreleaser.yaml`.
 
 ## Troubleshooting
 
