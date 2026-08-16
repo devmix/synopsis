@@ -26,7 +26,7 @@ Go 1.25 RAG + knowledge-graph MCP server (`github.com/devmix/synopsis`) with a D
 - Tests conventionally use `t.Parallel()` and `t.Run(...)` subtests.
 - Cross-compilation requires Zig 0.14+: `make build-all` (→ `bin/`) or `./scripts/build.sh <platform>` (→ `dist/`, what CI uses). macOS targets link against `scripts/darwin-stubs`; don't hand-roll those flags.
 
-**Build gotcha:** use `make build`, not a bare `go build`. The Makefile passes `CGO_CFLAGS="-DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_VEC"`; without them the migration runner silently skips fts5/vec0 tables (`isModuleError` path in `internal/database`) and search degrades with no error.
+**Build gotcha:** use `make build`, not a bare `go build`. The Makefile passes `CGO_CFLAGS="-DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_VEC"`; without them the migration runner silently skips fts5/vec0 tables (`isModuleError` path in `internal/database`) and search degrades with no error. `make test` sets the same flags — a bare `go test ./...` compiles **without** FTS5, so every fts5-backed test silently `t.Skip`s (green suite, zero FTS coverage). Native gcc targets also set `CGO_LDFLAGS=-lm`: FTS5 bm25 calls `log()`, which needs explicit libm on glibc where it is not merged into libc.
 
 ## CLI
 
