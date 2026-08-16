@@ -4,6 +4,7 @@ import type {ReactNode} from 'react';
 import styles from './index.module.css';
 
 import {useRevealOnScroll} from '../shared/lib/hooks/useRevealOnScroll';
+import {ArchitectureSection} from '../widgets/architecture';
 import {CtaSection} from '../widgets/cta';
 import {FeaturesSection} from '../widgets/features';
 import {Hero} from '../widgets/hero';
@@ -31,6 +32,7 @@ export default function Home(): ReactNode {
         </noscript>
         <main>
           <Hero />
+          <ArchitectureSection />
           <Ticker />
           <PipelineSection />
           <FeaturesSection />
