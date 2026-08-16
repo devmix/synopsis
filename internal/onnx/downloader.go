@@ -99,7 +99,7 @@ func (d *ModelDownloader) doDownload(rawURL, destPath string, totalSize int64) e
 	if err != nil {
 		return fmt.Errorf("HTTP GET: %w", err)
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status %s for %s", resp.Status, rawURL)
@@ -156,7 +156,7 @@ func (d *ModelDownloader) verifyChecksum(path, expected string) error {
 	if err != nil {
 		return fmt.Errorf("open file: %w", err)
 	}
-	defer f.Close()
+	defer f.Close() //nolint:errcheck
 
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {

@@ -95,7 +95,8 @@ func (m *LibraryManager) DownloadLibraryContext(ctx context.Context) error {
 	if err := m.downloadArchive(ctx, m.platform.ArchiveURL, archivePath); err != nil {
 		return fmt.Errorf("download archive: %w", err)
 	}
-	defer os.Remove(archivePath) // Clean up archive after extraction.
+	// Remove the downloaded archive once extraction has finished; failure is harmless.
+	defer os.Remove(archivePath) //nolint:errcheck
 
 	// Extract archive.
 	if err := m.extractArchive(archivePath, downloadDir); err != nil {
@@ -149,7 +150,7 @@ func (m *LibraryManager) downloadArchive(ctx context.Context, url, dest string) 
 	if err != nil {
 		return fmt.Errorf("http request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("download failed: %s", resp.Status)
@@ -160,7 +161,7 @@ func (m *LibraryManager) downloadArchive(ctx context.Context, url, dest string) 
 	if err != nil {
 		return fmt.Errorf("create file: %w", err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	// Create progress bar.
 	bar := progressbar.DefaultBytes(
@@ -194,7 +195,7 @@ func (m *LibraryManager) extractZip(archivePath, destDir string) error {
 	if err != nil {
 		return fmt.Errorf("open zip: %w", err)
 	}
-	defer zipReader.Close()
+	defer zipReader.Close() //nolint:errcheck
 
 	for _, f := range zipReader.File {
 		// Skip directories.
@@ -217,7 +218,7 @@ func (m *LibraryManager) extractZipFile(f *zip.File, destPath string) error {
 	if err != nil {
 		return fmt.Errorf("open file: %w", err)
 	}
-	defer srcFile.Close()
+	defer srcFile.Close() //nolint:errcheck
 
 	// Create destination directory.
 	if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
@@ -228,7 +229,7 @@ func (m *LibraryManager) extractZipFile(f *zip.File, destPath string) error {
 	if err != nil {
 		return fmt.Errorf("create file: %w", err)
 	}
-	defer destFile.Close()
+	defer destFile.Close() //nolint:errcheck
 
 	_, err = io.Copy(destFile, srcFile)
 	return err
@@ -240,13 +241,13 @@ func (m *LibraryManager) extractTgz(archivePath, destDir string) error {
 	if err != nil {
 		return fmt.Errorf("open tgz: %w", err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	gzipReader, err := gzip.NewReader(file)
 	if err != nil {
 		return fmt.Errorf("create gzip reader: %w", err)
 	}
-	defer gzipReader.Close()
+	defer gzipReader.Close() //nolint:errcheck
 
 	tarReader := tar.NewReader(gzipReader)
 
@@ -284,7 +285,7 @@ func (m *LibraryManager) extractTarFile(src io.Reader, destPath string) error {
 	if err != nil {
 		return fmt.Errorf("create file: %w", err)
 	}
-	defer destFile.Close()
+	defer destFile.Close() //nolint:errcheck
 
 	_, err = io.Copy(destFile, src)
 	return err
@@ -295,13 +296,13 @@ func (m *LibraryManager) copyFile(src, dst string) error {
 	if err != nil {
 		return fmt.Errorf("open source: %w", err)
 	}
-	defer sourceFile.Close()
+	defer sourceFile.Close() //nolint:errcheck
 
 	destFile, err := os.Create(dst)
 	if err != nil {
 		return fmt.Errorf("create destination: %w", err)
 	}
-	defer destFile.Close()
+	defer destFile.Close() //nolint:errcheck
 
 	_, err = io.Copy(destFile, sourceFile)
 	return err

@@ -246,7 +246,7 @@ func TestE2E_LLMStubBuildAndRead(t *testing.T) {
 	// Create stub LLM server first (needed for linker creation).
 	llmServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{
+		_, _ = fmt.Fprint(w, `{
 			"choices": [{
 				"message": {
 					"content": "{\"same_entity\": true, \"confidence\": 0.92, \"reasoning\": \"stub: names and types match\"}"

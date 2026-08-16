@@ -533,7 +533,7 @@ func TestCreateBackup_WALConsistent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open backup db: %v", err)
 	}
-	defer backupDB.Close()
+	defer backupDB.Close() //nolint:errcheck
 
 	var docCount int
 	if err := backupDB.QueryRow("SELECT COUNT(*) FROM documents").Scan(&docCount); err != nil {
@@ -669,7 +669,7 @@ func TestIngest_RebuildBackupContainsPreRebuildData(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open backup db: %v", err)
 	}
-	defer backupDB.Close()
+	defer backupDB.Close() //nolint:errcheck
 
 	var backupDocCount int
 	if err := backupDB.QueryRow("SELECT COUNT(*) FROM documents WHERE original_path = ?", seedPath).Scan(&backupDocCount); err != nil {

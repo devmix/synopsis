@@ -42,12 +42,12 @@ func TestLoadDomainConfig(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to create temp file: %v", err)
 		}
-		defer os.Remove(tmpFile.Name())
+		defer os.Remove(tmpFile.Name()) //nolint:errcheck
 
 		if _, err := tmpFile.WriteString(xmlContent); err != nil {
 			t.Fatalf("failed to write temp file: %v", err)
 		}
-		tmpFile.Close()
+		_ = tmpFile.Close()
 
 		config, err := LoadDomainConfig(tmpFile.Name())
 		if err != nil {
@@ -82,12 +82,12 @@ func TestLoadDomainConfig(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to create temp file: %v", err)
 		}
-		defer os.Remove(tmpFile.Name())
+		defer os.Remove(tmpFile.Name()) //nolint:errcheck
 
 		if _, err := tmpFile.WriteString(xmlContent); err != nil {
 			t.Fatalf("failed to write temp file: %v", err)
 		}
-		tmpFile.Close()
+		_ = tmpFile.Close()
 
 		config, err := LoadDomainConfig(tmpFile.Name())
 		if err != nil {
@@ -113,12 +113,12 @@ func TestLoadDomainConfig(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to create temp file: %v", err)
 		}
-		defer os.Remove(tmpFile.Name())
+		defer os.Remove(tmpFile.Name()) //nolint:errcheck
 
 		if _, err := tmpFile.WriteString(xmlContent); err != nil {
 			t.Fatalf("failed to write temp file: %v", err)
 		}
-		tmpFile.Close()
+		_ = tmpFile.Close()
 
 		_, err = LoadDomainConfig(tmpFile.Name())
 		if err == nil {

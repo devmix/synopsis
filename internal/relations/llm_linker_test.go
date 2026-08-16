@@ -897,13 +897,7 @@ func buildExpectedCacheKey(a, b relations.EntityCandidate, loader *prompts.Promp
 	}
 
 	h := fnv.New128a()
-	fmt.Fprint(h, first)
-	fmt.Fprint(h, "|")
-	fmt.Fprint(h, second)
-	fmt.Fprint(h, "|")
-	fmt.Fprint(h, sysHash)
-	fmt.Fprint(h, "|")
-	fmt.Fprint(h, userHash)
+	_, _ = fmt.Fprint(h, first, "|", second, "|", sysHash, "|", userHash)
 
 	return fmt.Sprintf("%x", h.Sum(nil))
 }

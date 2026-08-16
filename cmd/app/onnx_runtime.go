@@ -105,9 +105,9 @@ func runONNXRuntimeStatus(dataDir string, onnxCfg *config.ONNXConfig) {
 	fmt.Println("\nSupported Platforms:")
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	for _, p := range onnxCfg.Runtime.Platforms {
-		fmt.Fprintf(w, "  %s\t%s\n", p.Key, p.LibraryName)
+		fmt.Fprintf(w, "  %s\t%s\n", p.Key, p.LibraryName) //nolint:errcheck
 	}
-	w.Flush()
+	w.Flush() //nolint:errcheck
 }
 
 func runONNXRuntimeUninstall(dataDir string, onnxCfg *config.ONNXConfig) {
