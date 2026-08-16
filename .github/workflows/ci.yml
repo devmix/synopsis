@@ -1,5 +1,8 @@
-# CI Pipeline — test, lint, cross-compile (via GoReleaser), coverage.
-# Triggered on every push and pull request.
+# CI Pipeline — test, lint, coverage.
+# Cross-platform packaging is not built here on purpose: `go test` already
+# compiles and links the whole project natively (CGO + FTS5/VEC), and the repo
+# has no OS-conditional code. The full zig cross-build runs in release.yml at
+# tag time, when it actually matters. Keeping dev runs fast.
 name: CI
 
 on:
@@ -15,15 +18,14 @@ concurrency:
 
 env:
   GO_VERSION: "1.25.5"
-  ZIG_VERSION: "0.16.0"
 
 jobs:
   # ------------------------------------------------------------------
-  # Test — run the full test suite with race detector.
+  # Test — run the full test suite with race detector. This also compiles
+  # and links every package (including cmd/app) natively, so it doubles as
+  # the dev-branch build check; a separate `go build` job would add nothing.
   # CGO_CFLAGS enables FTS5/VEC in the bundled go-sqlite3 build; without
   # them fts5-dependent tests would silently run against a degraded engine.
-  # Scoped to this job only: it must not leak into the goreleaser build,
-  # which sets its own per-target CGO_CFLAGS from .goreleaser.yaml.
   # ------------------------------------------------------------------
   test:
     name: Test (ubuntu-latest)
@@ -71,52 +73,6 @@ jobs:
         with:
           version: v2.12
           args: ./...
-
-  # ------------------------------------------------------------------
-  # Build — full GoReleaser pipeline (build + archive + checksums) in
-  # snapshot mode, so CI validates exactly what the release produces.
-  # All platforms are cross-compiled via Zig from one job using
-  # .goreleaser.yaml as the single build source of truth.
-  # Gated on test+lint: no point cross-compiling five targets for red code.
-  # ------------------------------------------------------------------
-  build:
-    name: Build all platforms (GoReleaser snapshot)
-    runs-on: ubuntu-latest
-    needs: [test, lint]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true
-
-      # Symlink (not move) so Zig can resolve its bundled libraries, which
-      # the darwin cross-build needs for libSystem.tbd. Asset layout since
-      # 0.16: zig-<arch>-<os>-<version>.tar.xz -> top dir of the same name.
-      - name: Install Zig ${{ env.ZIG_VERSION }}
-        run: |
-          curl -fsSLo /tmp/zig.tar.xz \
-            "https://ziglang.org/download/${{ env.ZIG_VERSION }}/zig-x86_64-linux-${{ env.ZIG_VERSION }}.tar.xz"
-          tar xfJ /tmp/zig.tar.xz -C /opt/
-          ln -sf "/opt/zig-x86_64-linux-${{ env.ZIG_VERSION }}/zig" /usr/local/bin/zig
-          zig version
-
-      - name: Run GoReleaser (snapshot)
-        uses: goreleaser/goreleaser-action@v7.2.3
-        with:
-          distribution: goreleaser
-          version: v2.17.1
-          args: release --snapshot --clean
-
-      - name: Upload dist artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: goreleaser-dist
-          path: dist/
-          retention-days: 7
 
   # ------------------------------------------------------------------
   # Coverage — collect coverage; summary is printed to the job log.
