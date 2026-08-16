@@ -9,6 +9,7 @@ import type {
 import {BinaryIcon, DomainIcon, GraphIcon, LinkIcon, McpIcon, SearchIcon} from '../ui/icons';
 
 export const GITHUB_URL = 'https://github.com/devmix/synopsis';
+export const GITHUB_RELEASES_URL = `${GITHUB_URL}/releases`;
 
 export const TERMINAL_LINES: readonly TermLine[] = [
   {text: '$ ./synopsis onnx-runtime install', tone: 'cmd'},

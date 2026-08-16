@@ -1,7 +1,7 @@
 import Link from '@docusaurus/Link';
 import type {ReactNode} from 'react';
 
-import {GITHUB_URL, TERMINAL_LINES} from '../../shared/lib/data';
+import {GITHUB_RELEASES_URL, GITHUB_URL, TERMINAL_LINES} from '../../shared/lib/data';
 import {useScrambleTitle} from '../../shared/lib/hooks/useScrambleTitle';
 import {useTerminalTypewriter} from '../../shared/lib/hooks/useTerminalTypewriter';
 import {TrafficDots} from '../../shared/ui/terminal/TrafficDots';
@@ -45,6 +45,13 @@ export function Hero(): ReactNode {
                 target="_blank"
                 rel="noreferrer">
                 GITHUB ↗
+              </a>
+              <a
+                className={`${styles.btn} ${styles.btnGhost}`}
+                href={GITHUB_RELEASES_URL}
+                target="_blank"
+                rel="noreferrer">
+                RELEASES ↗
               </a>
             </div>
             <div className={styles.heroMeta}>
