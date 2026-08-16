@@ -1,5 +1,5 @@
 /**
-  * Synopsis[MEMEX] — landing mcp tools section (FSD-WIDGETS-4).
+  * synopsis[memex] — landing mcp tools section (FSD-WIDGETS-4).
   * Rules moved verbatim from src/pages/index.module.css (2026-08-16); the page
   * drops these rules for good because no section remains in index.tsx after
   * this batch — its module keeps only the .page/.noise shell. The `.wrap`,

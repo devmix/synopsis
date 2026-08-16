@@ -1,5 +1,5 @@
 /**
- * Synopsis[MEMEX] — landing hero + terminal frame (FSD-WIDGETS-1).
+ * synopsis[memex] — landing hero + terminal frame (FSD-WIDGETS-1).
  * Rules moved verbatim from src/pages/index.module.css (2026-08-16); the page keeps
  * .tdot* and tone classes for QuickstartSection until it is extracted.
  */
@@ -128,7 +128,7 @@
 .statusPill {
   position: absolute;
   top: -16px;
-  right: 24px;
+  left: 24px;
   z-index: 2;
   background: var(--accent);
   color: var(--accent-ink);

@@ -2,6 +2,7 @@ import Link from '@docusaurus/Link';
 import type {ReactNode} from 'react';
 
 import {GITHUB_URL, TERMINAL_LINES} from '../../shared/lib/data';
+import {useScrambleTitle} from '../../shared/lib/hooks/useScrambleTitle';
 import {useTerminalTypewriter} from '../../shared/lib/hooks/useTerminalTypewriter';
 import {TrafficDots} from '../../shared/ui/terminal/TrafficDots';
 
@@ -9,18 +10,24 @@ import styles from './Hero.module.css';
 
 export function Hero(): ReactNode {
   const termBodyRef = useTerminalTypewriter(TERMINAL_LINES);
+  const titleRef = useScrambleTitle();
   return (
     <header className={styles.hero}>
       <div className={styles.wrap}>
         <div className={styles.heroGrid}>
           <div>
             <p className={styles.eyebrow}>
-              <b>[ open source ]</b> single go binary · sqlite · mcp protocol
+              <b>[ open source ]</b> single binary · onnx · llm · sqlite · mcp
             </p>
-            <h1 className={styles.heroTitle}>
-              Synopsis
+            <h1
+              className={styles.heroTitle}
+              ref={titleRef}
+              aria-label="synopsis [memex]">
+              <span data-text="synopsis">synopsis</span>
               <br />
-              <span className={styles.hl}>[MEMEX]</span>
+              <span className={styles.hl} data-text="[memex]">
+                [memex]
+              </span>
             </h1>
             <p className={styles.heroSub}>
               <strong>Structured information for AI agents via MCP.</strong>
@@ -51,7 +58,16 @@ export function Hero(): ReactNode {
                 Store — <b>SQLite</b>
               </span>
               <span>
-                Embeddings — <b>ONNX</b>
+                Embeddings — <b>ONNX / Prose / LLM</b>
+              </span>
+              <span>
+                Linking — <b>CEL / Equals / LLM</b>
+              </span>
+              <span>
+                Ontology — <b>Domains / Relations</b>
+              </span>
+              <span>
+                LLM — <b>OpenAI API [local/remote]</b>
               </span>
             </div>
           </div>

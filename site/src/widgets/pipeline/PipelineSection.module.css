@@ -1,5 +1,5 @@
 /**
- * Synopsis[MEMEX] — landing pipeline section (FSD-WIDGETS-3).
+ * synopsis[memex] — landing pipeline section (FSD-WIDGETS-3).
  * Rules moved verbatim from src/pages/index.module.css (2026-08-16); the page
  * keeps its copies of `.wrap`, `.secTag`, `.display`, `.sectionLead`, `.d1–.d3`
  * and `.chipRow/.chip` because sections that remain in index.tsx still consume

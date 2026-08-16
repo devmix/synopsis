@@ -1,5 +1,5 @@
 /**
- * Synopsis[MEMEX] — global design tokens + reveal-on-scroll system.
+ * synopsis[memex] — global design tokens + reveal-on-scroll system.
  *
  * Extracted from src/pages/index.module.css (FSD-TOKENS). This is a plain
  * global stylesheet (NOT a CSS module), so all selectors below stay unscoped

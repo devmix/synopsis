@@ -23,7 +23,7 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="Structured information for AI agents via MCP"
-      description="Synopsis[MEMEX] is a zero-infrastructure knowledge base: hybrid search and an in-memory knowledge graph in one Go binary, exposed as 12 MCP tools.">
+      description="synopsis[memex] is a zero-infrastructure knowledge base: hybrid search and an in-memory knowledge graph in one Go binary, exposed as 12 MCP tools.">
       <div className={styles.page}>
         <div className={styles.noise} aria-hidden="true" />
         <noscript>
