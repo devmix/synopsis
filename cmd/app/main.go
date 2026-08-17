@@ -134,6 +134,29 @@ func main() {
 		runModelCommand(cfgPath, subArgs)
 	case "onnx-runtime":
 		runONNXRuntimeCommand(cfgPath, subArgs)
+	case "load-test":
+		scaleName := "small"
+		seed := int64(42)
+		iterations := 100
+		jsonPath := ""
+		noFill := false
+		cmdFlags := flag.NewFlagSet("load-test", flag.ExitOnError)
+		cmdFlags.StringVar(&scaleName, "scale", "small", "dataset scale: small, medium or large")
+		cmdFlags.Int64Var(&seed, "seed", 42, "PRNG seed for deterministic data generation")
+		cmdFlags.IntVar(&iterations, "iterations", 100, "measured iterations per tool case")
+		cmdFlags.StringVar(&jsonPath, "json", "", "write the report as JSON to this path")
+		cmdFlags.BoolVar(&noFill, "no-fill", false, "benchmark an existing database without generating data")
+		cmdFlags.Usage = func() {
+			fmt.Fprintln(os.Stderr, "usage: synopsis load-test [--scale small|medium|large] [--seed N] [--iterations N] [--json PATH] [--no-fill]")
+			cmdFlags.PrintDefaults()
+			fmt.Fprintln(os.Stderr, "")
+			fmt.Fprintln(os.Stderr, "Note: seed determinism is guaranteed for a single Go toolchain build;")
+			fmt.Fprintln(os.Stderr, "      math/rand sequences are not stable across Go releases.")
+		}
+		if err := cmdFlags.Parse(subArgs); err != nil {
+			os.Exit(1)
+		}
+		runLoadTest(cfgPath, *dbPath, scaleName, seed, iterations, jsonPath, noFill)
 	default:
 		fmt.Fprintf(os.Stderr, "error: unknown subcommand %q\n", subCmd)
 		printUsage()
@@ -153,6 +176,7 @@ func printUsage() {
 	fmt.Fprintln(os.Stderr, "  sync           force a full re-index of all sources and exit")
 	fmt.Fprintln(os.Stderr, "  model          manage embedding models (list, download, delete, info, benchmark)")
 	fmt.Fprintln(os.Stderr, "  onnx-runtime   manage the ONNX runtime bundled with the binary")
+	fmt.Fprintln(os.Stderr, "  load-test      fill the DB with synthetic data and benchmark all MCP tool handlers")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Flags:")
 	flag.PrintDefaults()
