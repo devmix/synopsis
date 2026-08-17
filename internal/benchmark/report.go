@@ -41,30 +41,42 @@ var reportTableOrder = []string{
 	"fact_sources", "entity_sources", "chunk_entities", "entity_links", "chunks_vec",
 }
 
-// Print writes a human-readable report to w.
-func (r *Report) Print(w io.Writer) {
-	fmt.Fprintf(w, "Synopsis load test — scale=%s seed=%d filled=%v\n", r.Scale.Name, r.Seed, r.Filled)
+// Print writes a human-readable report to w and returns the first write error.
+func (r *Report) Print(w io.Writer) error {
+	if _, err := fmt.Fprintf(w, "Synopsis load test — scale=%s seed=%d filled=%v\n", r.Scale.Name, r.Seed, r.Filled); err != nil {
+		return err
+	}
 
 	if r.Fill != nil {
 		total := int64(0)
 		for _, n := range r.Fill.Tables {
 			total += n
 		}
-		fmt.Fprintf(w, "\nFill: %.0f ms total, %d rows across tables, %d vectors embedded\n", r.Fill.DurationMs, total, r.Fill.Vectors)
+		if _, err := fmt.Fprintf(w, "\nFill: %.0f ms total, %d rows across tables, %d vectors embedded\n", r.Fill.DurationMs, total, r.Fill.Vectors); err != nil {
+			return err
+		}
 		for _, table := range reportTableOrder {
 			if n, ok := r.Fill.Tables[table]; ok {
-				fmt.Fprintf(w, "  %-15s %d\n", table+":", n)
+				if _, err := fmt.Fprintf(w, "  %-15s %d\n", table+":", n); err != nil {
+					return err
+				}
 			}
 		}
 	}
 
 	if r.Graph != nil {
-		fmt.Fprintf(w, "\nKnowledge graph: loaded in %.0f ms — %d nodes, %d edges\n", r.Graph.LoadMs, r.Graph.Nodes, r.Graph.Edges)
+		if _, err := fmt.Fprintf(w, "\nKnowledge graph: loaded in %.0f ms — %d nodes, %d edges\n", r.Graph.LoadMs, r.Graph.Nodes, r.Graph.Edges); err != nil {
+			return err
+		}
 	}
 
-	fmt.Fprintf(w, "\nTool benchmark (iterations=%d, pages per call=%d):\n", r.Iterations, r.PagesPerCall)
+	if _, err := fmt.Fprintf(w, "\nTool benchmark (iterations=%d, pages per call=%d):\n", r.Iterations, r.PagesPerCall); err != nil {
+		return err
+	}
 	tw := tabwriter.NewWriter(w, 2, 8, 2, ' ', 0)
-	fmt.Fprintln(tw, "TOOL\tCALLS\tPAGES\tERR\tAVG ms\tP50 ms\tP95 ms\tP99 ms\tMAX ms\tQPS")
+	if _, err := fmt.Fprintln(tw, "TOOL\tCALLS\tPAGES\tERR\tAVG ms\tP50 ms\tP95 ms\tP99 ms\tMAX ms\tQPS"); err != nil {
+		return err
+	}
 	for _, t := range r.Tools {
 		pages := "-"
 		if t.Pages > 0 {
@@ -74,8 +86,10 @@ func (r *Report) Print(w io.Writer) {
 		if t.Errors > 0 { // flag rows whose latency stats exclude failed iterations
 			name += " !"
 		}
-		fmt.Fprintf(tw, "%s\t%d\t%s\t%d\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.2f\n",
-			name, t.Calls, pages, t.Errors, t.AvgMs, t.P50Ms, t.P95Ms, t.P99Ms, t.MaxMs, t.ThroughputQPS)
+		if _, err := fmt.Fprintf(tw, "%s\t%d\t%s\t%d\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.2f\n",
+			name, t.Calls, pages, t.Errors, t.AvgMs, t.P50Ms, t.P95Ms, t.P99Ms, t.MaxMs, t.ThroughputQPS); err != nil {
+			return err
+		}
 	}
 	if err := tw.Flush(); err != nil {
 		fmt.Fprintf(w, "warning: flush report table: %v\n", err) //nolint:errcheck
@@ -83,9 +97,13 @@ func (r *Report) Print(w io.Writer) {
 
 	for _, t := range r.Tools {
 		if t.FirstError != "" {
-			fmt.Fprintf(w, "\nfirst error [%s]: %s\n", t.Name, t.FirstError)
+			if _, err := fmt.Fprintf(w, "\nfirst error [%s]: %s\n", t.Name, t.FirstError); err != nil {
+				return err
+			}
 		}
 	}
+
+	return nil
 }
 
 // WriteJSON writes the report as indented JSON to path.

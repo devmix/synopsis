@@ -151,7 +151,9 @@ func runLoadTest(cfgPath, dbPath string, scaleName string, seed int64, iteration
 	}
 	report.Tools = result.Tools
 
-	report.Print(os.Stdout)
+	if err := report.Print(os.Stdout); err != nil {
+		log.Fatal("write benchmark report", logger.Err(err))
+	}
 
 	if jsonPath != "" {
 		if err := report.WriteJSON(jsonPath); err != nil {
