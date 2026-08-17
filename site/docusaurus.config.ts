@@ -198,6 +198,23 @@ const config: Config = {
                         },
                     ],
                 },
+                {
+                    title: 'Legal',
+                    items: [
+                        {
+                            label: 'Privacy Policy',
+                            href: 'https://tekblueprint.org/legal/privacy-policy/',
+                        },
+                        {
+                            label: 'Terms of Service',
+                            href: 'https://tekblueprint.org/legal/terms-of-service/',
+                        },
+                        {
+                            label: 'Cookie Policy',
+                            href: 'https://tekblueprint.org/legal/use-cookies/',
+                        },
+                    ],
+                },
             ],
             copyright: `Copyright © ${new Date().getFullYear()} synopsis[memex] — structured information for AI agents via MCP.`,
         },

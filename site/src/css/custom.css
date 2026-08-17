@@ -572,11 +572,11 @@
     padding: 0 var(--pad-x);
 }
 
-/* --- links grid (kills Infima flex columns) ----------------------------- */
+/* --- links grid — 5 cols on desktop, 2 ≤1024px, 1 ≤720px --------------- */
 
 .footer__links {
     display: grid;
-    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr;
     gap: var(--foot-col-gap);
     margin-bottom: var(--gap-2xl);
 }
