@@ -10,6 +10,8 @@
 
 Zero-Infrastructure RAG & Knowledge Graph with hybrid search and [MCP](https://modelcontextprotocol.io) interface for LLM agents. Built in Go, runs entirely offline with SQLite + ONNX Runtime — no external dependencies required at runtime (an OpenAI-compatible API is optional, used only for LLM-based NER and cross-domain entity linking).
 
+[synopsis-memex.tekblueprint.org](https://synopsis-memex.tekblueprint.org) // [docs](https://synopsis-memex.tekblueprint.org/docs/intro)
+
 ## Overview
 
 Synopsis ingests documentation (Markdown, JSON datasets, MediaWiki dumps, saved web pages, unstructured files), builds a searchable index combining **lexical** (FTS5/BM25) and **semantic** (vector/cosine) search via Reciprocal Rank Fusion, extracts entities, relations, and facts into a knowledge graph with cross-domain entity linking, and exposes everything through 12 MCP tools consumable by Claude Desktop, Cursor, or any MCP-compatible client.
@@ -21,7 +23,11 @@ Synopsis ingests documentation (Markdown, JSON datasets, MediaWiki dumps, saved 
 - **NER pipeline**: composable stages configured per ontology — `regex`, `prose` (statistical), `llm`
 - **Auto-update**: file watcher re-indexes changed sources incrementally while the server runs
 
-## Architecture at a Glance
+## Architecture
+
+![Synopsis Architecture](site/static/img/architecture.svg)
+
+### Components
 
 | Component  | Technology                                                                       |
 |------------|----------------------------------------------------------------------------------|
