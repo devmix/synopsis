@@ -712,3 +712,121 @@
         gap: var(--foot-col-gap-sm);
     }
 }
+
+/**
+ * ============================================================
+ * COOKIE BANNER — GDPR / 152-FZ notice (COOKIE-CONSENT-BANNER).
+ * Full-width fixed bottom bar, injected by src/client/cookie-banner.ts.
+ * Uses design tokens only; no hardcoded hex values.
+ * ============================================================
+ */
+
+/* --- base bar ----------------------------------------------------------- */
+
+.cookie-banner {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000; /* below navbar (Infima default ~300) — no overlap since navbar is top */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap-md);
+    padding: var(--gap-sm) var(--pad-x);
+    background-color: var(--panel);
+    border-top: var(--bw) solid var(--line);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+
+    /* Entrance animation: slide-up + fade */
+    transform: translateY(0);
+    opacity: 1;
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        opacity var(--dur-base) var(--ease-out);
+}
+
+/* --- text --------------------------------------------------------------- */
+
+.cookie-banner__text {
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 0; /* prevent overflow on narrow screens */
+}
+
+.cookie-banner__text a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color var(--dur-fast) ease;
+}
+
+.cookie-banner__text a:hover {
+    color: var(--ifm-font-color-base);
+}
+
+[data-theme='dark'] .cookie-banner__text a:hover {
+    color: var(--text);
+}
+
+/* --- accept button ------------------------------------------------------ */
+
+.cookie-banner__accept {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-med);
+    letter-spacing: var(--ls-wider);
+    text-transform: uppercase;
+    padding: var(--gap-xs) var(--gap-md);
+    border: var(--bw) solid var(--accent-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--accent);
+    color: var(--accent-ink);
+    cursor: pointer;
+    transition:
+        box-shadow var(--dur-fast) ease,
+        border-color var(--dur-fast) ease;
+}
+
+.cookie-banner__accept:hover {
+    box-shadow: 0 0 12px var(--accent-glow);
+    border-color: var(--accent-stroke);
+}
+
+/* --- hidden state (dismissal animation) --------------------------------- */
+
+.cookie-banner--hidden {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* --- reduced motion ----------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .cookie-banner,
+    .cookie-banner--hidden {
+        transition: none;
+    }
+}
+
+/* --- responsive --------------------------------------------------------- */
+
+@media (max-width: 600px) {
+    .cookie-banner {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        padding: var(--gap-sm) var(--pad-x-narrow);
+    }
+
+    .cookie-banner__accept {
+        width: 100%;
+        max-width: 200px;
+        margin-inline: auto;
+    }
+}

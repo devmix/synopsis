@@ -20,6 +20,7 @@ const config: Config = {
     // Client modules.
     clientModules: [
         './src/client/navbar-scroll',   // transparent-at-top → blurred after 12px scroll
+        './src/client/cookie-banner',   // GDPR / 152-FZ cookie notice (Accept-only)
     ],
 
     url: 'https://devmix.github.io',
