@@ -24,7 +24,7 @@ const config: Config = {
     ],
 
     url: 'https://devmix.github.io',
-    baseUrl: 'synopsis/docs/website/build/',
+    baseUrl: '/',
 
     organizationName: 'devmix',
     projectName: 'synopsis',
