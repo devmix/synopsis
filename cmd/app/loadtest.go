@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/devmix/synopsis/internal/benchmark"
@@ -187,12 +188,20 @@ func requireEmbeddingModel(log *logger.Logger, cfg *config.Config) {
 		log.Fatal("init model manager", logger.Err(err))
 	}
 
-	path, ok := manager.GetModelPath(modelName)
+	modelDir, ok := manager.GetModelPath(modelName)
 	if !ok {
 		log.Fatal("embedding model not downloaded; run 'synopsis model download' first and retry",
 			"model", modelName, "hint", fmt.Sprintf("synopsis model download %s", modelName))
 	}
 
-	cfg.Embeddings.Local.ModelPath = path
-	log.Infow("embedding model verified", "name", modelName, "path", path)
+	// GetModelPath returns the model directory, but the local ONNX provider needs a path to
+	// the primary model file (e.g. model.onnx), as EnsureModel does for serve/sync. Fall back
+	// to the directory itself if the registry definition has no files.
+	modelPath := modelDir
+	if def, found := manager.Registry().Get(modelName); found && len(def.Files) > 0 {
+		modelPath = filepath.Join(modelDir, def.Files[0].Name)
+	}
+
+	cfg.Embeddings.Local.ModelPath = modelPath
+	log.Infow("embedding model verified", "name", modelName, "path", modelPath)
 }
