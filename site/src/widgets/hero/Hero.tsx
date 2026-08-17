@@ -31,9 +31,9 @@ export function Hero(): ReactNode {
             </h1>
             <p className={styles.heroSub}>
               <strong>Structured information for AI agents via MCP.</strong>
-              One Go binary combining hybrid search — BM25 and vectors, fused
-              with RRF — and an in-memory knowledge graph. No Python, no
-              Postgres, no Docker.
+              One Go binary — hybrid search, an in-memory knowledge graph, and
+              ontology-driven linking in a single process, served to AI agents
+              over MCP. No Python, no Postgres, no Docker.
             </p>
             <div className={styles.heroActions}>
               <Link className={`${styles.btn} ${styles.btnPrimary}`} to="/docs/intro">
