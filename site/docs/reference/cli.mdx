@@ -1,6 +1,6 @@
 ---
 title: CLI Reference
-description: All subcommands and flags of the synopsis binary — sync, serve, model, onnx-runtime — verified against the implementation
+description: All subcommands and flags of the synopsis binary — sync, serve, model, onnx-runtime, load-test — verified against the implementation
 sidebar_position: 1
 ---
 
@@ -18,6 +18,7 @@ synopsis [--config PATH] [--preset NAME] [--db PATH] [--version] <command> [comm
 | `serve` | Start the MCP server (initial sync + file watching + optional scheduler) |
 | `model` | Manage embedding models (`list`, `download`, `delete`, `info`, `benchmark`) |
 | `onnx-runtime` | Manage the bundled ONNX Runtime library (`install`, `status`, `uninstall`) |
+| `load-test` | Fill the database with deterministic synthetic data and benchmark all MCP tool handlers (14 cases) |
 
 Running the binary with no subcommand (or with an unknown subcommand) prints usage on stderr and exits with code `1`.
 
@@ -186,6 +187,28 @@ synopsis onnx-runtime <install|status|uninstall>
 ```
 
 An unknown subcommand prints the subcommand usage and exits with code `1`.
+
+## `load-test`
+
+Populates the target database with deterministic synthetic data — written straight into the tables with real embeddings, bypassing the ingestion pipeline — then benchmarks all MCP tool handlers directly, without HTTP.
+
+```
+synopsis load-test [--scale small|medium|large] [--seed N] [--iterations N] [--json PATH] [--no-fill]
+```
+
+| Flag | Default | Description |
+|---|---|---|
+| `--scale` | `small` | Dataset scale: `small` (500 docs / 10k chunks / 2k entities / 5k facts), `medium` (5k / 100k / 20k / 10k), `large` (10k / 200k / 40k / 20k) |
+| `--seed N` | `42` | PRNG seed for deterministic data generation |
+| `--iterations N` | `100` | Measured iterations per tool case |
+| `--json PATH` | — | Also write the report as indented JSON to `PATH` |
+| `--no-fill` | `false` | Benchmark an existing database without generating data |
+
+:::warning
+By default `load-test` **clears and rewrites the knowledge base** (all knowledge-base tables plus `chunks_vec`). Point `--db` at a throwaway path — e.g. `--db /tmp/loadtest.db` — never at a production database. The local embedding model must already be downloaded (`synopsis model download <name>`); the command fails with a clear error instead of downloading it mid-run.
+:::
+
+Full guide: [Load Testing](../guides/load-testing.mdx) — phases, scales, report format, sample output, and interpretation.
 
 ## Exit codes
 
