@@ -34,7 +34,7 @@ Three jobs (all on `ubuntu-latest`), wired so nothing downstream runs against re
 Notes:
 
 - **The test job doubles as the dev build check.** `go test` compiles and links every package — including `cmd/app` — natively, so a separate `go build` or cross-build job adds no signal on regular pushes. Cross-platform compilation is verified where it matters: at release time (below). The repo has no OS-conditional Go code, which is what makes this safe.
-- **Lint uses golangci-lint v2.** The last v1 release was built with Go 1.24 and refuses to target this module's `go 1.25` directive, so CI pins linter version `v2.12`. There is no `.golangci.yml` — defaults only.
+- **Lint uses golangci-lint v2.** The last v1 release was built with Go 1.24 and refuses to target this module's `go 1.25` directive, so CI pins linter version `v2.12`. Locally, `make lint` uses that same pinned version — it runs `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12 run ./...` rather than a locally installed binary, so what passes on your machine is exactly what runs in CI. There is no `.golangci.yml` — defaults only.
 - **The FTS5/VEC defines are not cosmetic.** Without them the migration runner silently skips the fts5 tables and search degrades with no error (see [Troubleshooting — CGO build failures](../guides/troubleshooting#cgo-build-failures)).
 
 ## Release workflow (`release.yml`)

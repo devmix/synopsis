@@ -14,7 +14,7 @@ sidebar_position: 2
 | C toolchain | gcc or clang | **CGO is mandatory** — `go-sqlite3` compiles SQLite (FTS5 + sqlite-vec) into the binary; `CGO_ENABLED=0` will fail |
 | Make | any recent | All day-to-day commands are Makefile targets |
 | Zig | 0.14+ | Optional — C toolchain for cross-compilation (see [Cross-compilation](#cross-compilation)) |
-| golangci-lint | latest | Only for `make lint` |
+| golangci-lint | v2.12 | No separate install — `make lint` runs the pinned version via `go run ...@v2.12`, matching CI |
 
 If you only build and run for your own platform, Zig is not needed.
 
@@ -92,7 +92,7 @@ The full package-by-package module map, with data flow, is in [Architecture](./a
 | `make rebuild` | Build + clear the DB and re-ingest everything | `./bin/synopsis --config configs/config.default.yaml sync --rebuild` |
 | `make test` | All tests with the race detector | `go test -race ./...` |
 | `make test-coverage` | Tests + HTML coverage report | `go test -coverprofile=coverage.out -race ./...` → `coverage.html` |
-| `make lint` | golangci-lint static analysis | `golangci-lint run ./...` |
+| `make lint` | golangci-lint static analysis (pinned to v2.12, matching CI) | `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12 run ./...` |
 | `make vet` | `go vet` checks | `go vet ./...` |
 | `make clean` | Remove build artifacts | `rm -rf bin/ coverage.out coverage.html` |
 | `make build-all` | Cross-compile all five platforms | all platform targets below |

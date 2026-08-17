@@ -262,9 +262,9 @@ test:
 test-coverage: test
 	$(GO) tool cover -html=coverage.out
 
-# Run linters
+# Run linters — pinned version to match CI (.github/workflows/ci.yml).
 lint:
-	golangci-lint run ./...
+	$(GO) run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12 run ./...
 
 # Format code
 fmt:

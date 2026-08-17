@@ -19,7 +19,7 @@ Go 1.25 RAG + knowledge-graph MCP server (`github.com/devmix/synopsis`) with a D
 | `make build` | builds `bin/synopsis` with required CGO flags |
 | `make run` / `make sync` / `make rebuild` | serve / one-shot re-index / clear DB + re-ingest |
 | `make test` | `go test -race ./...` — full suite ~5s, no services or network needed |
-| `make lint` | golangci-lint (no `.golangci.yml`; defaults only) |
+| `make lint` | golangci-lint **v2.12** — pinned via `go run ...@v2.12` to match CI; no `.golangci.yml`, defaults only |
 
 - Single package: `go test -race ./internal/search/...` · single test: `go test -race -run TestName ./pkg/...`
 - Integration e2e vector tests are build-tagged: `go test -tags=integration ./internal/database/` (self-contained, uses `/tmp` DB)

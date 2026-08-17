@@ -17,6 +17,9 @@ SQLITE_DEFS := -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_VEC
 # into libc. Harmless where it is, so set it on every native target.
 SQLITE_LDFLAGS := -lm
 
+# golangci-lint version pinned to match CI (.github/workflows/ci.yml).
+GOLANGCI_LINT_VERSION := v2.12
+
 # Default target builds for the current platform.
 build:
 	CGO_ENABLED=1 CGO_CFLAGS="$(SQLITE_DEFS) -O2" CGO_LDFLAGS="$(SQLITE_LDFLAGS)" go build -o $(OUTPUT_DIR)/$(BINARY_NAME) ./cmd/app/
@@ -42,7 +45,7 @@ test-coverage:
 	go tool cover -html=coverage.out -o coverage.html
 
 lint:
-	golangci-lint run ./...
+	go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run ./...
 
 vet:
 	go vet ./...
