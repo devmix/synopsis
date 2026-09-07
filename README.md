@@ -1,6 +1,12 @@
 # synopsis[memex]
 
-[![CI](https://img.shields.io/github/actions/workflow/status/devmix/synopsis/ci.yml?label=ci&branch=main)](https://github.com/devmix/synopsis/actions/workflows/ci.yml)
+> **Archived (2026-09-07) — no longer maintained.** The project has been
+> rewritten in Rust: the active implementation is
+> [devmix/synopsis-rs](https://github.com/devmix/synopsis-rs). This Go codebase
+> is kept read-only for reference; the last release binaries remain available
+> under [Releases](https://github.com/devmix/synopsis/releases).
+
+[![Archived](https://img.shields.io/badge/status-archived-lightgrey)](https://github.com/devmix/synopsis-rs)
 [![Release](https://img.shields.io/github/v/release/devmix/synopsis?include_prereleases)](https://github.com/devmix/synopsis/releases)
 [![License](https://img.shields.io/github/license/devmix/synopsis)](LICENSE)
 [![Go 1.25+](https://img.shields.io/badge/go-1.25%2B-blue?logo=go&logoColor=white)](https://go.dev/dl/)
